@@ -6,7 +6,8 @@
    "scripts": {
       "test": "echo \"Error: no test specified\" && exit 1",
       "lint": "eslint scripts/*.js",
-      "lint:fix": "eslint --fix scripts/*.js"
+      "lint:fix": "eslint --fix scripts/*.js",
+      "gulp": "gulp default"
    },
    "author": "Krzysztof Kryczka",
    "license": "ISC",
@@ -14,6 +15,8 @@
       "@eslint/js": "^9.8.0",
       "@stylistic/eslint-plugin-js": "^2.6.2",
       "eslint": "^9.8.0",
-      "globals": "^15.9.0"
+      "globals": "^15.9.0",
+      "gulp": "^5.0.0",
+      "gulp-eslint-new": "^2.2.0"
    }
 }
