@@ -5,6 +5,7 @@ const initializePage = () => {
    createHeader()
    createMain()
    createButtons()
+   createLogoSW()
    createFooter()
 }
 
@@ -38,6 +39,19 @@ const createButtons = () => {
    }
    const main = document.querySelector('main')
    main.appendChild(buttonContainer) // Dodaj kontener do sekcji głównej
+}
+
+// Dodawanie logo Star Wars
+const createLogoSW = () => {
+   const logoContainer = document.createElement('div')
+   logoContainer.classList.add('logo-container')
+   const starWarsLogo = document.createElement('img')
+   starWarsLogo.classList.add('sw-image')
+   starWarsLogo.src = './assets/images/starwars_logo.jpg'
+   starWarsLogo.alt = 'Star Wars Logo'
+   const main = document.querySelector('main')
+   logoContainer.appendChild(starWarsLogo)
+   main.appendChild(logoContainer)
 }
 
 // Tworzenie stopki (section: footer)
