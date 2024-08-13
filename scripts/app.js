@@ -42,6 +42,10 @@ const createButtons = () => {
          const main = document.querySelector('main')
          main.appendChild(tableText)
          removeLogo()
+         // Pobierz dane na podstawie nazwy przycisku
+         const data = rowData[key]
+         console.log(`Dane dla przycisku ${key}`, data)
+         console.log(`Dane dla przycisku ${key}`, JSON.stringify(data, null, 2))
       })
    }
    const main = document.querySelector('main')
