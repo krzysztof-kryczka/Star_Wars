@@ -36,6 +36,12 @@ const createButtons = () => {
       button.id = `button-${key}`
       button.setAttribute('data-category', key)
       buttonContainer.appendChild(button) // Dodaj przyciski do kontenera
+      button.addEventListener('click', () => {
+         const tableText = document.createElement('p')
+         tableText.textContent = 'Tabela'
+         const main = document.querySelector('main')
+         main.appendChild(tableText)
+      })
    }
    const main = document.querySelector('main')
    main.appendChild(buttonContainer) // Dodaj kontener do sekcji głównej
