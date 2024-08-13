@@ -26,14 +26,18 @@ const createMain = () => {
 // Tworzenie przycisków na podstawie kluczy obiektu rowData
 const createButtons = () => {
    const keys = Object.keys(rowData)
+   const buttonContainer = document.createElement('div') // Dodaj kontener dla przycisków
+   buttonContainer.classList.add('button-container') // Dodaj klasę do stylizacji wszystkich przycisków
    for (const key of keys) {
       const button = document.createElement('button')
       button.textContent = key.toUpperCase()
+      button.classList.add('sw-button') // Dodaj klasę do stylizacji pojedynczego przycisku
       button.id = `button-${key}`
       button.setAttribute('data-category', key)
-      const main = document.querySelector('main')
-      main.appendChild(button)
+      buttonContainer.appendChild(button) // Dodaj przyciski do kontenera
    }
+   const main = document.querySelector('main')
+   main.appendChild(buttonContainer) // Dodaj kontener do sekcji głównej
 }
 
 // Tworzenie stopki (section: footer)
