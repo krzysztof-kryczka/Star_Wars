@@ -4,6 +4,7 @@ import { rowData } from '../assets/data/data.js'
 const initializePage = () => {
    createHeader()
    createMain()
+   createButtons()
    createFooter()
 }
 
@@ -20,6 +21,19 @@ const createHeader = () => {
 const createMain = () => {
    const main = document.createElement('main')
    document.body.appendChild(main)
+}
+
+// Tworzenie przycisków na podstawie kluczy obiektu rowData
+const createButtons = () => {
+   const keys = Object.keys(rowData)
+   for (const key of keys) {
+      const button = document.createElement('button')
+      button.textContent = key.toUpperCase()
+      button.id = `button-${key}`
+      button.setAttribute('data-category', key)
+      const main = document.querySelector('main')
+      main.appendChild(button)
+   }
 }
 
 // Tworzenie stopki (section: footer)
