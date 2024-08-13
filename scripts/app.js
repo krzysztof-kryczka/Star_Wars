@@ -41,6 +41,7 @@ const createButtons = () => {
          tableText.textContent = 'Tabela'
          const main = document.querySelector('main')
          main.appendChild(tableText)
+         removeLogo()
       })
    }
    const main = document.querySelector('main')
@@ -58,6 +59,14 @@ const createLogoSW = () => {
    const main = document.querySelector('main')
    logoContainer.appendChild(starWarsLogo)
    main.appendChild(logoContainer)
+}
+
+// Usuwanie logo Star Wars z drzewa DOM
+const removeLogo = () => {
+   const logoContainer = document.querySelector('.logo-container')
+   if (logoContainer) {
+      logoContainer.remove() // Usuń kontener z drzewa DOM
+   }
 }
 
 // Tworzenie stopki (section: footer)
