@@ -194,6 +194,9 @@ const displayDataInTable = (movieData, category) => {
       for (const keyToShow of keysToShow) {
          const cell = document.createElement('td')
          cell.textContent = `${item[keyToShow]}`
+         // Usuń znaki specjalne \r i \n z tekstu w cell.textContent
+         const cleanedText = cell.textContent.split(/\\r|\\n/).join('')
+         cell.textContent = cleanedText
          row.appendChild(cell)
       }
       // Pozostałe komórki (CREATED i ACTIONS)
