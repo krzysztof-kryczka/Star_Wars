@@ -57,6 +57,7 @@ const handleButtonClick = e => {
    const table = createTable(movieData, category)
    const main = document.querySelector('main')
    main.appendChild(table)
+   displayDataInTable(movieData, category)
 }
 
 // Funkcja tworząca tabelę
@@ -138,6 +139,82 @@ const getHeadersForCategory = (movieData, category) => {
       default:
          return [] // Zwracamy pustą tablicę dla nieznanej kategorii
    }
+}
+
+// Funkcja wyświetlająca dane w tabeli
+const displayDataInTable = (movieData, category) => {
+   const tbody = document.querySelector('tbody')
+   movieData.forEach((item, index) => {
+      const row = document.createElement('tr')
+      const idCell = document.createElement('td')
+      idCell.textContent = `${index + 1}`
+      row.appendChild(idCell)
+      console.log(item)
+      // Wybierz dowolne 3 klucze (np. 'name', 'birth_year', 'gender')
+      // Wybierz odpowiednie klucze w zależności od kategorii
+      let keysToShow = []
+      if (category === 'vehicles') {
+         keysToShow = [
+            Object.keys(item)[0], // NAME
+            Object.keys(item)[1], // MODEL
+            Object.keys(item)[2], // MANUFACTURER
+         ]
+      } else if (category === 'starships') {
+         keysToShow = [
+            Object.keys(item)[0], // NAME
+            Object.keys(item)[1], // MODEL
+            Object.keys(item)[2], // MANUFACTURER
+         ]
+      } else if (category === 'species') {
+         keysToShow = [
+            Object.keys(item)[0], // NAME
+            Object.keys(item)[1], // CLASSIFICATION
+            Object.keys(item)[2], // DESIGNATION
+         ]
+      } else if (category === 'planets') {
+         keysToShow = [
+            Object.keys(item)[0], // NAME
+            Object.keys(item)[1], // ROTATION_PERIOD
+            Object.keys(item)[2], // ORBITAL_PERIOD
+         ]
+      } else if (category === 'people') {
+         keysToShow = [
+            Object.keys(item)[0], // NAME
+            Object.keys(item)[1], // HEIGHT
+            Object.keys(item)[2], // MASS
+         ]
+      } else if (category === 'films') {
+         keysToShow = ['title', 'episode_id', 'opening_crawl']
+         keysToShow = [
+            Object.keys(item)[0], // TITLE
+            Object.keys(item)[1], // EPISODE_ID
+            Object.keys(item)[2], // OPENING_CRAWL
+         ]
+      }
+      for (const keyToShow of keysToShow) {
+         const cell = document.createElement('td')
+         cell.textContent = `${item[keyToShow]}`
+         row.appendChild(cell)
+      }
+      // Pozostałe komórki (CREATED i ACTIONS)
+      const createdCell = document.createElement('td')
+      createdCell.textContent = `${item.created}`
+      row.appendChild(createdCell)
+      const actionsCell = document.createElement('td')
+      const trashButton = document.createElement('button')
+      trashButton.innerHTML = 'REMOVE'
+      actionsCell.appendChild(trashButton)
+      const infoButton = document.createElement('button')
+      infoButton.innerHTML = 'INFO'
+      actionsCell.appendChild(infoButton)
+      const checkbox = document.createElement('input')
+      checkbox.type = 'checkbox'
+      actionsCell.appendChild(trashButton)
+      actionsCell.appendChild(infoButton)
+      actionsCell.appendChild(checkbox)
+      row.appendChild(actionsCell)
+      tbody.appendChild(row)
+   })
 }
 
 // Dodawanie logo Star Wars
