@@ -45,10 +45,12 @@ const createButtons = () => {
 // Funkcja obsługująca kliknięcie przycisku
 const handleButtonClick = e => {
    removeLogo()
-   // Usuń poprzednią tabelkę (jeśli istnieje)
+   // Usuń poprzednią tabelkę i elementy paginacji (jeśli istnieją)
    const previousTable = document.querySelector('table')
+   const previousPagination = document.querySelector('.pagination')
    if (previousTable) {
       previousTable.remove()
+      previousPagination.remove()
    }
    // Pobierz nazwę kategorii z przycisku
    const category = e.target.getAttribute('data-category')
@@ -58,6 +60,7 @@ const handleButtonClick = e => {
    const main = document.querySelector('main')
    main.appendChild(table)
    displayDataInTable(movieData, category)
+   createPageNavigation(movieData, category)
 }
 
 // Funkcja tworząca tabelę
@@ -144,6 +147,7 @@ const getHeadersForCategory = (movieData, category) => {
 // Funkcja wyświetlająca dane w tabeli
 const displayDataInTable = (movieData, category) => {
    const tbody = document.querySelector('tbody')
+   tbody.innerHTML = '' // Wyczyść zawartość tbody
    movieData.forEach((item, index) => {
       const row = document.createElement('tr')
       const idCell = document.createElement('td')
@@ -219,6 +223,33 @@ const displayDataInTable = (movieData, category) => {
    })
 }
 
+const createPageNavigation = () => {
+   const currentPage = 1
+   const totalPages = 1
+   const main = document.querySelector('main')
+   const navBottomContainer = document.createElement('div')
+   navBottomContainer.classList.add('pagination')
+   // lewa strzałka
+   const leftArrowButton = createButton('⬅️', 'leftArrowButton')
+   navBottomContainer.appendChild(leftArrowButton)
+   // input
+   const currentPageInput = createInput('number', 'currentPageInput', '1', '1', totalPages)
+   navBottomContainer.appendChild(currentPageInput)
+   // bieżąca strona
+   const currentPageInfo = document.createElement('span')
+   currentPageInfo.textContent = `Strona ${currentPage} z ${totalPages}`
+   currentPageInfo.id = 'currentPageInfo'
+   navBottomContainer.appendChild(currentPageInfo)
+   // prawa strzałka
+   const rightArrowButton = createButton('➡️', 'rightArrowButton')
+   navBottomContainer.appendChild(rightArrowButton)
+   // select
+   const selectOptions = [10, 20]
+   const selectElement = createSelect(selectOptions)
+   navBottomContainer.appendChild(selectElement)
+   main.appendChild(navBottomContainer)
+}
+
 // Dodawanie logo Star Wars
 const createLogoSW = () => {
    const logoContainer = document.createElement('div')
@@ -251,9 +282,10 @@ const createFooter = () => {
 
 /// Funkcje pomocnicze
 
-const createButton = text => {
+const createButton = (text, className) => {
    const button = document.createElement('button')
-   button.innerHTML = text
+   button.innerHTML = `${text}`
+   button.classList.add(className)
    return button
 }
 
@@ -261,6 +293,27 @@ const createCheckbox = () => {
    const checkbox = document.createElement('input')
    checkbox.type = 'checkbox'
    return checkbox
+}
+
+function createSelect(options) {
+   const select = document.createElement('select')
+   for (const optionValue of options) {
+      const option = document.createElement('option')
+      option.textContent = `${optionValue} na stronę`
+      option.value = `${optionValue}`
+      select.appendChild(option)
+   }
+   return select
+}
+
+function createInput(type, id, placeholder = 1, min = 1, max = 1) {
+   const input = document.createElement('input')
+   input.type = `${type}`
+   input.placeholder = `${placeholder}`
+   input.id = `${id}`
+   input.min = `${min}`
+   input.max = `${max}`
+   return input
 }
 
 // Wywołanie funkcji inicjalizującej po załadowaniu strony
