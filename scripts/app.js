@@ -45,6 +45,11 @@ const createButtons = () => {
 // Funkcja obsługująca kliknięcie przycisku
 const handleButtonClick = e => {
    removeLogo()
+   // Usuń poprzednią tabelkę (jeśli istnieje)
+   const previousTable = document.querySelector('table')
+   if (previousTable) {
+      previousTable.remove()
+   }
    // Pobierz nazwę kategorii z przycisku
    const category = e.target.getAttribute('data-category')
    // Pobierz dane na podstawie nazwy przycisku
@@ -52,7 +57,6 @@ const handleButtonClick = e => {
    const table = createTable(movieData, category)
    const main = document.querySelector('main')
    main.appendChild(table)
-
 }
 
 // Funkcja tworząca tabelę
