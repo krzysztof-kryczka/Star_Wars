@@ -198,7 +198,12 @@ const displayDataInTable = (movieData, category) => {
       }
       // Pozostałe komórki (CREATED i ACTIONS)
       const createdCell = document.createElement('td')
-      createdCell.textContent = `${item.created}`
+      // Formatowanie daty do stylu: day-month-year
+      const date = new Date(item.created)
+      const day = date.getDate()
+      const month = date.getMonth() + 1
+      const year = date.getFullYear()
+      createdCell.textContent = `${day}-${month}-${year}`
       row.appendChild(createdCell)
       const actionsCell = document.createElement('td')
       const trashButton = document.createElement('button')
