@@ -184,7 +184,6 @@ const displayDataInTable = (movieData, category) => {
             Object.keys(item)[2], // MASS
          ]
       } else if (category === 'films') {
-         keysToShow = ['title', 'episode_id', 'opening_crawl']
          keysToShow = [
             Object.keys(item)[0], // TITLE
             Object.keys(item)[1], // EPISODE_ID
@@ -209,14 +208,9 @@ const displayDataInTable = (movieData, category) => {
       createdCell.textContent = `${day}-${month}-${year}`
       row.appendChild(createdCell)
       const actionsCell = document.createElement('td')
-      const trashButton = document.createElement('button')
-      trashButton.innerHTML = 'REMOVE'
-      actionsCell.appendChild(trashButton)
-      const infoButton = document.createElement('button')
-      infoButton.innerHTML = 'INFO'
-      actionsCell.appendChild(infoButton)
-      const checkbox = document.createElement('input')
-      checkbox.type = 'checkbox'
+      const trashButton = createButton('REMOVE')
+      const infoButton = createButton('INFO')
+      const checkbox = createCheckbox()
       actionsCell.appendChild(trashButton)
       actionsCell.appendChild(infoButton)
       actionsCell.appendChild(checkbox)
@@ -253,6 +247,20 @@ const createFooter = () => {
    authorInfo.textContent = '© Projekt i realizacja strony: Krzysztof Kryczka - 2024'
    footer.appendChild(authorInfo)
    document.body.appendChild(footer)
+}
+
+/// Funkcje pomocnicze
+
+const createButton = text => {
+   const button = document.createElement('button')
+   button.innerHTML = text
+   return button
+}
+
+const createCheckbox = () => {
+   const checkbox = document.createElement('input')
+   checkbox.type = 'checkbox'
+   return checkbox
 }
 
 // Wywołanie funkcji inicjalizującej po załadowaniu strony
