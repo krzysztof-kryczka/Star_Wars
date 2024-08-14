@@ -36,20 +36,104 @@ const createButtons = () => {
       button.id = `button-${key}`
       button.setAttribute('data-category', key)
       buttonContainer.appendChild(button) // Dodaj przyciski do kontenera
-      button.addEventListener('click', () => {
-         const tableText = document.createElement('p')
-         tableText.textContent = 'Tabela'
-         const main = document.querySelector('main')
-         main.appendChild(tableText)
-         removeLogo()
-         // Pobierz dane na podstawie nazwy przycisku
-         const data = rowData[key]
-         console.log(`Dane dla przycisku ${key}`, data)
-         console.log(`Dane dla przycisku ${key}`, JSON.stringify(data, null, 2))
-      })
+      button.addEventListener('click', handleButtonClick)
    }
    const main = document.querySelector('main')
    main.appendChild(buttonContainer) // Dodaj kontener do sekcji głównej
+}
+
+// Funkcja obsługująca kliknięcie przycisku
+const handleButtonClick = e => {
+   removeLogo()
+   // Pobierz nazwę kategorii z przycisku
+   const category = e.target.getAttribute('data-category')
+   // Pobierz dane na podstawie nazwy przycisku
+   const movieData = rowData[category]
+   const table = createTable(movieData, category)
+   const main = document.querySelector('main')
+   main.appendChild(table)
+
+}
+
+// Funkcja tworząca tabelę
+const createTable = (movieData, category) => {
+   const table = document.createElement('table')
+   const thead = document.createElement('thead')
+   const tbody = document.createElement('tbody')
+   // Nagłówki zależne od kategorii przycisku
+   const headers = getHeadersForCategory(movieData, category)
+   const headerRow = document.createElement('tr')
+   for (const header of headers) {
+      const th = document.createElement('th')
+      th.textContent = `${header}`
+      headerRow.appendChild(th)
+   }
+   thead.appendChild(headerRow)
+   table.appendChild(thead)
+   table.appendChild(tbody)
+   return table
+}
+
+// Funkcja zwracająca nagłówki na podstawie kategorii
+const getHeadersForCategory = (movieData, category) => {
+   switch (category) {
+      case 'vehicles':
+         return [
+            'ID',
+            Object.keys(movieData[0])[0].toUpperCase(), // NAME
+            Object.keys(movieData[0])[1].toUpperCase(), // MODEL
+            Object.keys(movieData[0])[2].toUpperCase(), // MANUFACTURER
+            'CREATED',
+            'ACTIONS',
+         ]
+      case 'starships':
+         return [
+            'ID',
+            Object.keys(movieData[0])[0].toUpperCase(), // NAME
+            Object.keys(movieData[0])[1].toUpperCase(), // MODEL
+            Object.keys(movieData[0])[2].toUpperCase(), // MANUFACTURER
+            'CREATED',
+            'ACTIONS',
+         ]
+      case 'species':
+         return [
+            'ID',
+            Object.keys(movieData[0])[0].toUpperCase(), // NAME
+            Object.keys(movieData[0])[1].toUpperCase(), // CLASSIFICATION
+            Object.keys(movieData[0])[2].toUpperCase(), // DESIGNATION
+            'CREATED',
+            'ACTIONS',
+         ]
+      case 'planets':
+         return [
+            'ID',
+            Object.keys(movieData[0])[0].toUpperCase(), // NAME
+            Object.keys(movieData[0])[1].toUpperCase().split('_').join(' '), // ROTATION PERIOD
+            Object.keys(movieData[0])[2].toUpperCase().split('_').join(' '), // 'ORBITAL PERIOD'
+            'CREATED',
+            'ACTIONS',
+         ]
+      case 'people':
+         return [
+            'ID',
+            Object.keys(movieData[0])[0].toUpperCase(), // NAME
+            Object.keys(movieData[0])[1].toUpperCase(), // HEIGHT
+            Object.keys(movieData[0])[2].toUpperCase(), // MASS
+            'CREATED',
+            'ACTIONS',
+         ]
+      case 'films':
+         return [
+            'ID',
+            Object.keys(movieData[0])[0].toUpperCase(), // TITLE
+            Object.keys(movieData[0])[1].toUpperCase().split('_').join(' '), // 'EPISODE ID
+            Object.keys(movieData[0])[2].toUpperCase().split('_').join(' '), // 'OPENING CRAWL'
+            'CREATED',
+            'ACTIONS',
+         ]
+      default:
+         return [] // Zwracamy pustą tablicę dla nieznanej kategorii
+   }
 }
 
 // Dodawanie logo Star Wars
