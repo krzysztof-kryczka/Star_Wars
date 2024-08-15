@@ -148,6 +148,15 @@ const getHeadersForCategory = (movieData, category) => {
 const displayDataInTable = (movieData, category) => {
    const tbody = document.querySelector('tbody')
    tbody.innerHTML = '' // Wyczyść zawartość tbody
+   // wyświetla komunikat "Brak elementów do wyświetlenia"
+   if (movieData.length === 0) {
+      const noDataMessage = document.createElement('tr')
+      noDataMessage.innerHTML = '<td colspan="6">Brak elementów do wyświetlenia</td>'
+      tbody.appendChild(noDataMessage)
+      const pagination = document.querySelector('.pagination')
+      pagination.remove()
+      return // Zakończ funkcję, nie twórz wierszy
+   }
    movieData.forEach((item, index) => {
       const row = document.createElement('tr')
       const idCell = document.createElement('td')
@@ -218,6 +227,16 @@ const displayDataInTable = (movieData, category) => {
          const rowToRemove = trashButton.parentNode.parentNode // Dwa poziomy wyżej do elementu <tr>
          console.log(rowToRemove)
          tbody.removeChild(rowToRemove) // Usuń wiersz z tabeli
+         // wyświetla komunikat "Brak elementów do wyświetlenia"
+         const rows = tbody.querySelectorAll('tr')
+         if (rows.length === 0) {
+            const noDataMessage = document.createElement('tr')
+            noDataMessage.innerHTML = '<td colspan="6">Brak elementów do wyświetlenia</td>'
+            tbody.appendChild(noDataMessage)
+            const pagination = document.querySelector('.pagination')
+            pagination.remove()
+            return // Zakończ funkcję, nie twórz wierszy
+         }
       })
       const infoButton = createButton('INFO')
       const checkbox = createCheckbox()
