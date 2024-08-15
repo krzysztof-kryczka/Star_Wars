@@ -213,6 +213,12 @@ const displayDataInTable = (movieData, category) => {
       row.appendChild(createdCell)
       const actionsCell = document.createElement('td')
       const trashButton = createButton('REMOVE')
+      trashButton.addEventListener('click', () => {
+         // Znajdź wiersz, który ma być usunięty
+         const rowToRemove = trashButton.parentNode.parentNode // Dwa poziomy wyżej do elementu <tr>
+         console.log(rowToRemove)
+         tbody.removeChild(rowToRemove) // Usuń wiersz z tabeli
+      })
       const infoButton = createButton('INFO')
       const checkbox = createCheckbox()
       actionsCell.appendChild(trashButton)
