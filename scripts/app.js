@@ -50,7 +50,7 @@ const handleButtonClick = e => {
    const previousPagination = document.querySelector('.pagination')
    if (previousTable) {
       previousTable.remove()
-      previousPagination.remove()
+      previousPagination?.remove()
    }
    // Pobierz nazwę kategorii z przycisku
    const category = e.target.getAttribute('data-category')
@@ -148,14 +148,10 @@ const getHeadersForCategory = (movieData, category) => {
 const displayDataInTable = (movieData, category) => {
    const tbody = document.querySelector('tbody')
    tbody.innerHTML = '' // Wyczyść zawartość tbody
-   // wyświetla komunikat "Brak elementów do wyświetlenia"
    if (movieData.length === 0) {
-      const noDataMessage = document.createElement('tr')
-      noDataMessage.innerHTML = '<td colspan="6">Brak elementów do wyświetlenia</td>'
-      tbody.appendChild(noDataMessage)
-      const pagination = document.querySelector('.pagination')
-      pagination.remove()
-      return // Zakończ funkcję, nie twórz wierszy
+      // Wyświetla komunikat "Brak elementów do wyświetlenia"
+      displayNoDataMessage(tbody)
+      return // Zakończ funkcję displayDataInTable, nie twórz wierszy
    }
    movieData.forEach((item, index) => {
       const row = document.createElement('tr')
@@ -204,45 +200,16 @@ const displayDataInTable = (movieData, category) => {
          ]
       }
       for (const keyToShow of keysToShow) {
-         const cell = document.createElement('td')
-         cell.textContent = `${item[keyToShow]}`
-         // Usuń znaki specjalne \r i \n z tekstu w cell.textContent
-         const cleanedText = cell.textContent.split(/\\r|\\n/).join('')
-         cell.textContent = cleanedText
+         const cell = createBasicStarWarsCell(item[keyToShow])
          row.appendChild(cell)
       }
       // Pozostałe komórki (CREATED i ACTIONS)
+      // Created cell
       const createdCell = document.createElement('td')
-      // Formatowanie daty do stylu: day-month-year
-      const date = new Date(item.created)
-      const day = date.getDate()
-      const month = date.getMonth() + 1
-      const year = date.getFullYear()
-      createdCell.textContent = `${day}-${month}-${year}`
+      createdCell.textContent = `${formatDate(item.created)}`
       row.appendChild(createdCell)
-      const actionsCell = document.createElement('td')
-      const trashButton = createButton('REMOVE')
-      trashButton.addEventListener('click', () => {
-         // Znajdź wiersz, który ma być usunięty
-         const rowToRemove = trashButton.parentNode.parentNode // Dwa poziomy wyżej do elementu <tr>
-         console.log(rowToRemove)
-         tbody.removeChild(rowToRemove) // Usuń wiersz z tabeli
-         // wyświetla komunikat "Brak elementów do wyświetlenia"
-         const rows = tbody.querySelectorAll('tr')
-         if (rows.length === 0) {
-            const noDataMessage = document.createElement('tr')
-            noDataMessage.innerHTML = '<td colspan="6">Brak elementów do wyświetlenia</td>'
-            tbody.appendChild(noDataMessage)
-            const pagination = document.querySelector('.pagination')
-            pagination.remove()
-            return // Zakończ funkcję, nie twórz wierszy
-         }
-      })
-      const infoButton = createButton('INFO')
-      const checkbox = createCheckbox()
-      actionsCell.appendChild(trashButton)
-      actionsCell.appendChild(infoButton)
-      actionsCell.appendChild(checkbox)
+      // Actions Cell
+      const actionsCell = createActionsCell(row)
       row.appendChild(actionsCell)
       tbody.appendChild(row)
    })
@@ -339,6 +306,71 @@ function createInput(type, id, placeholder = 1, min = 1, max = 1) {
    input.min = `${min}`
    input.max = `${max}`
    return input
+}
+
+// Funkcja do tworzenia komórek tabeli z API SW
+const createBasicStarWarsCell = text => {
+   const cell = document.createElement('td')
+   // Usuń znaki specjalne \r i \n z tekstu w cell.textContent Category FILMS
+   cell.textContent = `${text}`
+   const cleanedText = cell.textContent.split(/\\r|\\n/).join(' ')
+   cell.textContent = cleanedText
+   return cell
+}
+
+// Funkcja do tworzenia komórki tabeli Actions
+const createActionsCell = row => {
+   const createdCell = document.createElement('td')
+   const trashButton = createButton('REMOVE')
+   trashButton.addEventListener('click', () => {
+      removeRow(row)
+   })
+   const infoButton = createButton('INFO')
+   const checkbox = createCheckbox()
+   // createdCell.appendChild(trashButton)
+   // createdCell.appendChild(infoButton)
+   // createdCell.appendChild(checkbox)
+   createdCell.append(trashButton, infoButton, checkbox)
+   return createdCell
+}
+
+// Funkcja do usuwania pojedynczego wiersza
+const removeRow = row => {
+   // Znajdź wiersz, który ma być usunięty
+   // const rowToRemove = trashButton.parentNode.parentNode // Dwa poziomy wyżej do elementu <tr>
+   // console.log(rowToRemove)
+   const tbody = document.querySelector('tbody')
+   console.log(tbody)
+   console.log(row)
+   tbody.removeChild(row)
+   checkEmptyTable() // Sprawdź, czy tabela jest pusta
+}
+
+// Funkcja wyświetlająca komunikat "Brak elementów do wyświetlenia"
+const displayNoDataMessage = tbody => {
+   const noDataMessage = document.createElement('tr')
+   noDataMessage.innerHTML = '<td colspan="6">Brak elementów do wyświetlenia</td>'
+   tbody.appendChild(noDataMessage)
+   const pagination = document.querySelector('.pagination')
+   pagination?.remove()
+}
+
+// Funkcja sprawdzająca, czy tabela jest pusta
+const checkEmptyTable = () => {
+   const tbody = document.querySelector('tbody')
+   const rows = tbody.querySelectorAll('tr')
+   if (rows.length === 0) {
+      displayNoDataMessage(tbody)
+   }
+}
+
+// Funkcja do formatowania daty
+const formatDate = dateString => {
+   const date = new Date(dateString)
+   const day = date.getDate()
+   const month = date.getMonth() + 1
+   const year = date.getFullYear()
+   return `${day}-${month}-${year}`
 }
 
 // Wywołanie funkcji inicjalizującej po załadowaniu strony
