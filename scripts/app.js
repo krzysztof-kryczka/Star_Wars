@@ -210,6 +210,7 @@ const displayDataInTable = (movieData, category) => {
       row.appendChild(createdCell)
       // Actions Cell
       const actionsCell = createActionsCell(row)
+      row.dataset.rowData = JSON.stringify(item) // Przypisz dane wiersza
       row.appendChild(actionsCell)
       tbody.appendChild(row)
    })
@@ -325,7 +326,14 @@ const createActionsCell = row => {
    trashButton.addEventListener('click', () => {
       removeRow(row)
    })
-   const infoButton = createButton('INFO')
+   const infoButton = createButton('INFO', 'info-button')
+   infoButton.setAttribute('data-target', 'data-modal-open')
+   infoButton.addEventListener('click', () => {
+      const { rowData } = row.dataset
+      const parsedData = JSON.parse(rowData)
+      showModal(parsedData)
+   })
+
    const checkbox = createCheckbox()
    // createdCell.appendChild(trashButton)
    // createdCell.appendChild(infoButton)
@@ -371,6 +379,47 @@ const formatDate = dateString => {
    const month = date.getMonth() + 1
    const year = date.getFullYear()
    return `${day}-${month}-${year}`
+}
+
+// Funkcja do wyświetlania okna modalnego
+const showModal = data => {
+   const modal = document.createElement('div')
+   modal.classList.add('modal')
+   modal.id = 'modal'
+   modal.innerHTML = ''
+   const table = document.createElement('table')
+   for (const key in data) {
+      const row = document.createElement('tr')
+      const keyCell = document.createElement('td')
+      const valueCell = document.createElement('td')
+      keyCell.textContent = key
+      const text = data[key]
+      console.log(`text: ${text}`)
+      console.log('typeof: ', typeof text)
+      const urlArray = text.toString().split(',').join(',\n')
+      console.log(`urlArray: ${urlArray}`)
+      valueCell.textContent = urlArray
+      // valueCell.textContent = data[key]
+      row.appendChild(keyCell)
+      row.appendChild(valueCell)
+      table.appendChild(row)
+   }
+   modal.appendChild(table)
+   const closeButton = createButton('×', 'modal-close-btn')
+   closeButton.setAttribute('data-target', 'data-modal-close')
+   closeButton.addEventListener('click', () => {
+      closeModal(modal)
+   })
+   modal.appendChild(closeButton)
+   document.body.appendChild(modal)
+   console.log(`Dane z wiersza: ${data}`)
+}
+
+// Funkcja do zamykania okna modalnego
+const closeModal = modal => {
+   if (modal) {
+      modal.remove() // Usuń element z drzewa DOM
+   }
 }
 
 // Wywołanie funkcji inicjalizującej po załadowaniu strony
