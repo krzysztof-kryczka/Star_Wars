@@ -208,6 +208,13 @@ const displayDataInTable = (movieData, category) => {
       const createdCell = document.createElement('td')
       createdCell.textContent = `${formatDate(item.created)}`
       row.appendChild(createdCell)
+      // Button cell
+      const buttonCell = document.createElement('td')
+      const removeAllButton = createButton('Remove all', 'remove-all-button')
+      // removeAllButton.style.display = 'none'
+      removeAllButton.classList.add('is-hidden')
+      buttonCell.appendChild(removeAllButton)
+      row.appendChild(buttonCell)
       // Actions Cell
       const actionsCell = createActionsCell(row)
       row.dataset.rowData = JSON.stringify(item) // Przypisz dane wiersza
@@ -336,19 +343,18 @@ const createActionsCell = row => {
 
    const checkbox = createCheckbox()
    checkbox.classList.add('checkbox')
-   const removeAllButton = createButton('Remove all', 'remove-all-button')
-   removeAllButton.style.display = 'none'
    // Nasłuchuj zmian w checkboxach
    checkbox.addEventListener('change', () => {
       const checkboxes = document.querySelectorAll('.checkbox')
-      console.log(checkboxes)
+      const removeAllButton = document.querySelector('.remove-all-button')
+      console.log('checkboxes NodeList', checkboxes)
       const checkedCheckboxes = Array.from(checkboxes).filter(cb => cb.checked)
-      console.log(checkedCheckboxes)
-      removeAllButton.style.display = checkedCheckboxes.length > 0 ? 'block' : 'none'
+      console.log('Array with checkedCheckboxes', checkedCheckboxes)
+      // removeAllButton.style.display = checkedCheckboxes.length > 0 ? 'block' : 'none'
+      checkedCheckboxes.length > 0
+         ? removeAllButton.classList.remove('is-hidden')
+         : removeAllButton.classList.add('is-hidden')
    })
-   if (!row.querySelector('.remove-all-button')) {
-      createdCell.appendChild(removeAllButton)
-   }
    // createdCell.appendChild(trashButton)
    // createdCell.appendChild(infoButton)
    // createdCell.appendChild(checkbox)
