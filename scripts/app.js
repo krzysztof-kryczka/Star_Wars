@@ -220,6 +220,17 @@ const displayDataInTable = (movieData, category) => {
       const removeAllButton = createButton('Remove all', 'remove-all-button')
       // removeAllButton.style.display = 'none'
       removeAllButton.classList.add('is-hidden')
+      removeAllButton.addEventListener('click', () => {
+         const checkboxes = document.querySelectorAll('.checkbox')
+         checkboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+               const row = checkbox.closest('tr') // Znajdź rodzica (wiersz) checkboxa
+               console.log('Usnięty wiersz to: ', row)
+               row.remove() // Usuń wiersz
+            }
+         })
+         checkEmptyTable() // Sprawdź, czy tabela jest pusta
+      })
       buttonCell.appendChild(removeAllButton)
       row.appendChild(buttonCell)
       // Actions Cell
