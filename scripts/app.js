@@ -76,6 +76,13 @@ const createTable = (movieData, category) => {
       th.textContent = `${header}`
       headerRow.appendChild(th)
    }
+   // Dodatkowy nagłówek dla przycisku Remove All
+   const additionalHeader = document.createElement('th')
+   additionalHeader.textContent = ''
+   // Pobierz ostatni nagłówek
+   const lastHeader = headerRow.lastElementChild
+   // Wstaw nowy nagłówek przed ostatnim nagłówkiem
+   headerRow.insertBefore(additionalHeader, lastHeader)
    thead.appendChild(headerRow)
    table.appendChild(thead)
    table.appendChild(tbody)
@@ -348,12 +355,14 @@ const createActionsCell = row => {
       const checkboxes = document.querySelectorAll('.checkbox')
       const removeAllButton = document.querySelector('.remove-all-button')
       console.log('checkboxes NodeList', checkboxes)
-      const checkedCheckboxes = Array.from(checkboxes).filter(cb => cb.checked)
+      // const checkedCheckboxes = Array.from(checkboxes).filter(cb => cb.checked)
+      const checkedCheckboxes = [...checkboxes].filter(cb => cb.checked)
       console.log('Array with checkedCheckboxes', checkedCheckboxes)
       // removeAllButton.style.display = checkedCheckboxes.length > 0 ? 'block' : 'none'
-      checkedCheckboxes.length > 0
-         ? removeAllButton.classList.remove('is-hidden')
-         : removeAllButton.classList.add('is-hidden')
+      // checkedCheckboxes.length > 0
+      //    ? removeAllButton.classList.remove('is-hidden')
+      //    : removeAllButton.classList.add('is-hidden')
+      removeAllButton.classList.toggle('is-hidden', checkedCheckboxes.length === 0)
    })
    // createdCell.appendChild(trashButton)
    // createdCell.appendChild(infoButton)
