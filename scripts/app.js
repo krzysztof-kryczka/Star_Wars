@@ -335,6 +335,20 @@ const createActionsCell = row => {
    })
 
    const checkbox = createCheckbox()
+   checkbox.classList.add('checkbox')
+   const removeAllButton = createButton('Remove all', 'remove-all-button')
+   removeAllButton.style.display = 'none'
+   // Nasłuchuj zmian w checkboxach
+   checkbox.addEventListener('change', () => {
+      const checkboxes = document.querySelectorAll('.checkbox')
+      console.log(checkboxes)
+      const checkedCheckboxes = Array.from(checkboxes).filter(cb => cb.checked)
+      console.log(checkedCheckboxes)
+      removeAllButton.style.display = checkedCheckboxes.length > 0 ? 'block' : 'none'
+   })
+   if (!row.querySelector('.remove-all-button')) {
+      createdCell.appendChild(removeAllButton)
+   }
    // createdCell.appendChild(trashButton)
    // createdCell.appendChild(infoButton)
    // createdCell.appendChild(checkbox)
