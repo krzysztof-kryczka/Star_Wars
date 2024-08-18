@@ -48,9 +48,11 @@ const handleButtonClick = e => {
    // Usuń poprzednią tabelkę i elementy paginacji (jeśli istnieją)
    const previousTable = document.querySelector('table')
    const previousPagination = document.querySelector('.pagination')
+   const previousSearchInput = document.querySelector('.search-input-container')
    if (previousTable) {
       previousTable.remove()
       previousPagination?.remove()
+      previousSearchInput.remove()
    }
    // Pobierz nazwę kategorii z przycisku
    const category = e.target.getAttribute('data-category')
@@ -60,7 +62,30 @@ const handleButtonClick = e => {
    const main = document.querySelector('main')
    main.appendChild(table)
    displayDataInTable(movieData, category)
+   createSearchInput()
    createPageNavigation(movieData, category)
+}
+
+// Funkcja tworząca input search by id
+const createSearchInput = () => {
+   const searchInputContainer = document.createElement('div')
+   searchInputContainer.classList.add('search-input-container')
+   const visibleRows = document.querySelectorAll('table tr')
+   console.log('visibleRows', visibleRows)
+   const searchInputId = createInput(
+      'number',
+      'searchInputId',
+      'searchInputId',
+      'Please enter ID...',
+      '1',
+      `${visibleRows.length - 1}`,
+   )
+   const labelElement = document.createElement('label')
+   labelElement.textContent = 'Search by index:'
+   labelElement.setAttribute('for', searchInputId.id)
+   searchInputContainer.append(labelElement, searchInputId)
+   const table = document.querySelector('table')
+   table.parentNode.insertBefore(searchInputContainer, table) // Wstaw nowy element przed istniejącym
 }
 
 // Funkcja tworząca tabelę
@@ -324,11 +349,12 @@ function createSelect(options) {
    return select
 }
 
-function createInput(type, id, placeholder = 1, min = 1, max = 1) {
+function createInput(type, id, className, placeholder = 1, min = 1, max = 1) {
    const input = document.createElement('input')
    input.type = `${type}`
    input.placeholder = `${placeholder}`
    input.id = `${id}`
+   input.classList.add(className)
    input.min = `${min}`
    input.max = `${max}`
    return input
