@@ -19,3 +19,8 @@
 .is-hidden {
    display: none;
 }
+
+.no-row-message {
+   color: #af0808;
+   font-weight: 700;
+}

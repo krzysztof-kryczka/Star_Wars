@@ -86,6 +86,44 @@ const createSearchInput = () => {
    searchInputContainer.append(labelElement, searchInputId)
    const table = document.querySelector('table')
    table.parentNode.insertBefore(searchInputContainer, table) // Wstaw nowy element przed istniejącym
+   searchInputId.addEventListener('input', handleSearchInputId)
+}
+
+// Funkcja obsługująca zdarzenie wprowadzania tekstu w inpucie 'searchInputId'
+const handleSearchInputId = e => {
+   const inputValue = e.target.value
+   console.log(typeof inputValue, inputValue)
+   let foundRow = false // Flaga, czy znaleziono wiersz
+   const tableRows = document.querySelectorAll('tbody tr')
+   console.log(tableRows)
+   tableRows.forEach(row => {
+      const rowIdCell = row.querySelector('tbody td:nth-child(2n+1)') // 1,3,5,7...
+      console.log('rowidcell', rowIdCell)
+      if (rowIdCell) {
+         const rowId = rowIdCell.textContent
+         console.log('rowId', rowId)
+         if (rowId === inputValue || inputValue === '') {
+            row.classList.remove('is-hidden') // Wyświetl wiersz
+            foundRow = true
+         } else {
+            row.classList.add('is-hidden') // Ukryj pozostałe wiersze
+         }
+      }
+   })
+   // Usuń komunikat, jeśli wiersz został znaleziony
+   const noRowMessage = document.querySelector('.no-row-message')
+   if (foundRow && noRowMessage) {
+      noRowMessage.remove()
+   } else if (!foundRow) {
+      // Dodaj komunikat, jeśli wiersz nie został znaleziony
+      const noRowMessage = document.createElement('tr')
+      noRowMessage.classList.add('no-row-message')
+      const noRowCell = document.createElement('td')
+      noRowCell.textContent = `Nie znaleziono wiersza o ID ${inputValue}`
+      noRowCell.colSpan = 6 // Rozciągnij komórkę na całą szerokość tabeli
+      noRowMessage.appendChild(noRowCell)
+      document.querySelector('table').appendChild(noRowMessage)
+   }
 }
 
 // Funkcja tworząca tabelę
