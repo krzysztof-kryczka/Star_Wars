@@ -73,15 +73,33 @@ const createSearchInput = () => {
    const visibleRows = document.querySelectorAll('tbody tr[data-row-data]')
    console.log('visibleRows', visibleRows)
    const searchInputId = createInput('number', 'searchInputId', 'searchInputId', 'Please enter ID...', '1', '1000')
-   const labelElement = document.createElement('label')
-   labelElement.textContent = 'Search by index:'
-   labelElement.setAttribute('for', searchInputId.id)
+   const labelElementId = document.createElement('label')
+   labelElementId.textContent = 'Search by index:'
+   labelElementId.setAttribute('for', searchInputId.id)
    const amountRecords = document.createElement('p')
    amountRecords.textContent = `Amount of records: ${visibleRows.length}`
-   searchInputContainer.append(labelElement, searchInputId, amountRecords)
+   const searchInputNameOrTitle = createInput(
+      'string',
+      'searchInputNameOrTitle',
+      'searchInputNameOrTitle',
+      'Please enter name or title',
+      '1',
+      '1000',
+   )
+   const labelElementNameOrTitle = document.createElement('label')
+   labelElementNameOrTitle.textContent = 'Search by name/title:'
+   labelElementNameOrTitle.setAttribute('for', searchInputNameOrTitle.id)
+   searchInputContainer.append(
+      labelElementId,
+      searchInputId,
+      amountRecords,
+      labelElementNameOrTitle,
+      searchInputNameOrTitle,
+   )
    const table = document.querySelector('table')
    table.parentNode.insertBefore(searchInputContainer, table) // Wstaw nowy element przed istniejącym
    searchInputId.addEventListener('input', handleSearchInputId)
+   searchInputNameOrTitle.addEventListener('input', handleSearchInputNameOrTitle)
 }
 
 // Funkcja obsługująca zdarzenie wprowadzania tekstu w inpucie 'searchInputId'
@@ -116,6 +134,41 @@ const handleSearchInputId = e => {
       newNoRowMessage.classList.add('no-row-message')
       const noRowCell = document.createElement('td')
       noRowCell.textContent = `Nie znaleziono wiersza o ID ${inputValue}`
+      noRowCell.colSpan = 6 // Rozciągnij komórkę na całą szerokość tabeli
+      newNoRowMessage.appendChild(noRowCell)
+      document.querySelector('table').appendChild(newNoRowMessage)
+   }
+}
+
+// Funkcja obsługująca zdarzenie wprowadzania tekstu w inpucie 'searchInputNameOrTitle'
+const handleSearchInputNameOrTitle = e => {
+   const inputValue = e.target.value.toLowerCase()
+   let foundRow = false // Flaga, czy znaleziono wiersz
+   const tableRows = document.querySelectorAll('tbody tr[data-row-data]')
+   // Usuń komunikat, jeśli wiersz został znaleziony
+   const noRowMessage = document.querySelector('.no-row-message')
+   if (noRowMessage) {
+      noRowMessage.remove()
+   }
+   tableRows.forEach(row => {
+      const nameOrTitleCell = row.querySelector('tbody td:nth-child(2n)') // 2,4,6,8...')
+      if (nameOrTitleCell) {
+         const name = nameOrTitleCell.textContent.toLowerCase()
+         // Sprawdź, czy nazwa lub tytuł zawiera wprowadzony ciąg znaków
+         if (name.includes(inputValue)|| inputValue === '') {
+            row.classList.remove('is-hidden') // Wyświetl wiersz
+            foundRow = true
+         } else {
+            row.classList.add('is-hidden') // Ukryj pozostałe wiersze
+         }
+      }
+   })
+   // Dodaj komunikat, jeśli wiersz nie został znaleziony
+   if (!foundRow) {
+      const newNoRowMessage = document.createElement('tr')
+      newNoRowMessage.classList.add('no-row-message')
+      const noRowCell = document.createElement('td')
+      noRowCell.textContent = 'Nie znaleziono pasującego wiersza.'
       noRowCell.colSpan = 6 // Rozciągnij komórkę na całą szerokość tabeli
       newNoRowMessage.appendChild(noRowCell)
       document.querySelector('table').appendChild(newNoRowMessage)
