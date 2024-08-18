@@ -52,7 +52,7 @@ const handleButtonClick = e => {
    if (previousTable) {
       previousTable.remove()
       previousPagination?.remove()
-      previousSearchInput.remove()
+      previousSearchInput?.remove()
    }
    // Pobierz nazwę kategorii z przycisku
    const category = e.target.getAttribute('data-category')
@@ -70,20 +70,15 @@ const handleButtonClick = e => {
 const createSearchInput = () => {
    const searchInputContainer = document.createElement('div')
    searchInputContainer.classList.add('search-input-container')
-   const visibleRows = document.querySelectorAll('table tr')
+   const visibleRows = document.querySelectorAll('tbody tr[data-row-data]')
    console.log('visibleRows', visibleRows)
-   const searchInputId = createInput(
-      'number',
-      'searchInputId',
-      'searchInputId',
-      'Please enter ID...',
-      '1',
-      `${visibleRows.length - 1}`,
-   )
+   const searchInputId = createInput('number', 'searchInputId', 'searchInputId', 'Please enter ID...', '1', '1000')
    const labelElement = document.createElement('label')
    labelElement.textContent = 'Search by index:'
    labelElement.setAttribute('for', searchInputId.id)
-   searchInputContainer.append(labelElement, searchInputId)
+   const amountRecords = document.createElement('p')
+   amountRecords.textContent = `Amount of records: ${visibleRows.length}`
+   searchInputContainer.append(labelElement, searchInputId, amountRecords)
    const table = document.querySelector('table')
    table.parentNode.insertBefore(searchInputContainer, table) // Wstaw nowy element przed istniejącym
    searchInputId.addEventListener('input', handleSearchInputId)
@@ -94,7 +89,7 @@ const handleSearchInputId = e => {
    const inputValue = e.target.value
    console.log(typeof inputValue, inputValue)
    let foundRow = false // Flaga, czy znaleziono wiersz
-   const tableRows = document.querySelectorAll('tbody tr')
+   const tableRows = document.querySelectorAll('tbody tr[data-row-data]')
    console.log(tableRows)
    // Usuń komunikat, jeśli wiersz został znaleziony
    const noRowMessage = document.querySelector('.no-row-message')
@@ -294,6 +289,7 @@ const displayDataInTable = (movieData, category) => {
             }
          })
          checkEmptyTable() // Sprawdź, czy tabela jest pusta
+         updateSearchInput() // zaktualizuj Search Input po sunięciu wiersza
       })
       buttonCell.appendChild(removeAllButton)
       row.appendChild(buttonCell)
@@ -457,6 +453,7 @@ const removeRow = row => {
    console.log(row)
    tbody.removeChild(row)
    checkEmptyTable() // Sprawdź, czy tabela jest pusta
+   updateSearchInput() // zaktualizuj Search Input po sunięciu wiersza
 }
 
 // Funkcja wyświetlająca komunikat "Brak elementów do wyświetlenia"
@@ -466,6 +463,8 @@ const displayNoDataMessage = tbody => {
    tbody.appendChild(noDataMessage)
    const pagination = document.querySelector('.pagination')
    pagination?.remove()
+   const previousSearchInput = document.querySelector('.search-input-container')
+   previousSearchInput?.remove()
 }
 
 // Funkcja sprawdzająca, czy tabela jest pusta
@@ -474,6 +473,15 @@ const checkEmptyTable = () => {
    const rows = tbody.querySelectorAll('tr')
    if (rows.length === 0) {
       displayNoDataMessage(tbody)
+   }
+}
+
+// Funkcja odświeża widok Search Input po usunięciu wiersza tabeli
+const updateSearchInput = () => {
+   const previousSearchInput = document.querySelector('.search-input-container')
+   if (previousSearchInput) {
+      previousSearchInput.remove()
+      createSearchInput()
    }
 }
 
