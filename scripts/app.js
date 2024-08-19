@@ -243,7 +243,7 @@ const getHeadersForCategory = (movieData, category) => {
 }
 
 // Funkcja wyświetlająca dane w tabeli
-const displayDataInTable = (movieData, category, itemsPerPage = 10) => {
+const displayDataInTable = (movieData, category, currentPage = 1, itemsPerPage = 10) => {
    const tbody = document.querySelector('tbody')
    tbody.innerHTML = '' // Wyczyść zawartość tbody
    if (movieData.length === 0) {
@@ -251,10 +251,13 @@ const displayDataInTable = (movieData, category, itemsPerPage = 10) => {
       displayNoDataMessage(tbody)
       return // Zakończ funkcję displayDataInTable, nie twórz wierszy
    }
-   movieData.slice(0, itemsPerPage).forEach((item, index) => {
+   console.log('(currentPage - 1) * itemsPerPage', (currentPage - 1) * itemsPerPage)
+   console.log('currentPage * itemsPerPage', currentPage * itemsPerPage)
+   console.log('slice', movieData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage))
+   movieData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).forEach((item, index) => {
       const row = document.createElement('tr')
       const idCell = document.createElement('td')
-      idCell.textContent = `${index + 1}`
+      idCell.textContent = `${(currentPage - 1) * itemsPerPage + index + 1}`
       row.appendChild(idCell)
       console.log(item)
       // Wybierz dowolne 3 klucze (np. 'name', 'birth_year', 'gender')
@@ -334,8 +337,8 @@ const displayDataInTable = (movieData, category, itemsPerPage = 10) => {
 }
 
 const createPageNavigation = (movieData, category) => {
-   const currentPage = 1
-   const totalPages = 1
+   let currentPage = 1
+   const totalPages = Math.ceil(movieData.length / 10)
    const main = document.querySelector('main')
    const navBottomContainer = document.createElement('div')
    navBottomContainer.classList.add('pagination')
@@ -343,12 +346,26 @@ const createPageNavigation = (movieData, category) => {
    const leftArrowButton = createButton('⬅️', 'leftArrowButton')
    navBottomContainer.appendChild(leftArrowButton)
    // input
-   const currentPageInput = createInput('number', 'currentPageInput', '1', '1', totalPages)
+   const currentPageInput = createInput('number', 'currentPageInput', 'currentPageInput', '1', '1', totalPages)
    navBottomContainer.appendChild(currentPageInput)
+   // Dodaj obsługę zdarzenia zmiany wartości inputa
+   currentPageInput.addEventListener('input', () => {
+      const newPage = currentPageInput.value
+      if (newPage) {
+         // Aktualizuj bieżącą stronę i wyświetl dane
+         // Jeśli newPage przekracza totalPages, ustawiamy currentPage na totalPages.
+         // W przeciwnym razie ustawiamy currentPage na newPage.
+         currentPage = newPage > totalPages ? totalPages : newPage
+         displayDataInTable(movieData, category, currentPage)
+         const currentPageInfo = document.querySelector('.currentPageInfo')
+         currentPageInfo.textContent = `${currentPage} z ${totalPages}`
+      }
+   })
    // bieżąca strona
    const currentPageInfo = document.createElement('span')
-   currentPageInfo.textContent = `Strona ${currentPage} z ${totalPages}`
+   currentPageInfo.textContent = `${currentPage} z ${totalPages}`
    currentPageInfo.id = 'currentPageInfo'
+   currentPageInfo.classList.add('currentPageInfo')
    navBottomContainer.appendChild(currentPageInfo)
    // prawa strzałka
    const rightArrowButton = createButton('➡️', 'rightArrowButton')
@@ -358,7 +375,7 @@ const createPageNavigation = (movieData, category) => {
    const selectElement = createSelect(selectOptions)
    navBottomContainer.appendChild(selectElement)
    selectElement.addEventListener('change', () =>
-      displayDataInTable(movieData, category, parseInt(selectElement.value)),
+      displayDataInTable(movieData, category, currentPage, parseInt(selectElement.value)),
    )
    main.appendChild(navBottomContainer)
 }
