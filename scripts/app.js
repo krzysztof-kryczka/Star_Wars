@@ -98,78 +98,45 @@ const createSearchInput = () => {
    )
    const table = document.querySelector('table')
    table.parentNode.insertBefore(searchInputContainer, table) // Wstaw nowy element przed istniejącym
-   searchInputId.addEventListener('input', handleSearchInputId)
-   searchInputNameOrTitle.addEventListener('input', handleSearchInputNameOrTitle)
-}
-
-// Funkcja obsługująca zdarzenie wprowadzania tekstu w inpucie 'searchInputId'
-const handleSearchInputId = e => {
-   const inputValue = e.target.value
-   console.log(typeof inputValue, inputValue)
-   let foundRow = false // Flaga, czy znaleziono wiersz
-   const tableRows = document.querySelectorAll('tbody tr[data-row-data]')
-   console.log(tableRows)
-   // Usuń komunikat, jeśli wiersz został znaleziony
-   const noRowMessage = document.querySelector('.no-row-message')
-   if (noRowMessage) {
-      noRowMessage.remove()
-   }
-   tableRows.forEach(row => {
-      const rowIdCell = row.querySelector('tbody td:nth-child(2n+1)') // 1,3,5,7...
-      console.log('rowidcell', rowIdCell)
-      if (rowIdCell) {
-         const rowId = rowIdCell.textContent
-         console.log('rowId', rowId)
-         if (rowId === inputValue || inputValue === '') {
-            row.classList.remove('is-hidden') // Wyświetl wiersz
-            foundRow = true
-         } else {
-            row.classList.add('is-hidden') // Ukryj pozostałe wiersze
-         }
-      }
+   searchInputId.addEventListener('input', e => {
+      handleSearchInput(e, 'tbody td:nth-child(2n+1)', false)
    })
-   // Dodaj komunikat, jeśli wiersz nie został znaleziony
-   if (!foundRow) {
-      const newNoRowMessage = document.createElement('tr')
-      newNoRowMessage.classList.add('no-row-message')
-      const noRowCell = document.createElement('td')
-      noRowCell.textContent = `Nie znaleziono wiersza o ID ${inputValue}`
-      noRowCell.colSpan = 6 // Rozciągnij komórkę na całą szerokość tabeli
-      newNoRowMessage.appendChild(noRowCell)
-      document.querySelector('table').appendChild(newNoRowMessage)
-   }
+   searchInputNameOrTitle.addEventListener('input', e => {
+      handleSearchInput(e, 'tbody td:nth-child(2n)', true)
+   })
 }
 
-// Funkcja obsługująca zdarzenie wprowadzania tekstu w inpucie 'searchInputNameOrTitle'
-const handleSearchInputNameOrTitle = e => {
+// Funkcja obsługująca zdarzenie wprowadzania id lub tekstu w inpucie
+const handleSearchInput = (e, cellIndex, useIncludes) => {
    const inputValue = e.target.value.toLowerCase()
-   let foundRow = false // Flaga, czy znaleziono wiersz
+   let foundRow = false
    const tableRows = document.querySelectorAll('tbody tr[data-row-data]')
-   // Usuń komunikat, jeśli wiersz został znaleziony
    const noRowMessage = document.querySelector('.no-row-message')
    if (noRowMessage) {
       noRowMessage.remove()
    }
    tableRows.forEach(row => {
-      const nameOrTitleCell = row.querySelector('tbody td:nth-child(2n)') // 2,4,6,8...')
-      if (nameOrTitleCell) {
-         const name = nameOrTitleCell.textContent.toLowerCase()
-         // Sprawdź, czy nazwa lub tytuł zawiera wprowadzony ciąg znaków
-         if (name.includes(inputValue)|| inputValue === '') {
-            row.classList.remove('is-hidden') // Wyświetl wiersz
+      const cell = row.querySelector(`${cellIndex}`)
+      if (cell) {
+         const cellValue = cell.textContent.toLowerCase()
+         if (
+            useIncludes && cellValue.includes(inputValue) ||
+            !useIncludes && cellValue === inputValue ||
+            inputValue === ''
+         ) {
+            row.classList.remove('is-hidden')
             foundRow = true
          } else {
-            row.classList.add('is-hidden') // Ukryj pozostałe wiersze
+            row.classList.add('is-hidden')
          }
       }
    })
-   // Dodaj komunikat, jeśli wiersz nie został znaleziony
    if (!foundRow) {
       const newNoRowMessage = document.createElement('tr')
       newNoRowMessage.classList.add('no-row-message')
       const noRowCell = document.createElement('td')
       noRowCell.textContent = 'Nie znaleziono pasującego wiersza.'
-      noRowCell.colSpan = 6 // Rozciągnij komórkę na całą szerokość tabeli
+      noRowCell.colSpan = 6
       newNoRowMessage.appendChild(noRowCell)
       document.querySelector('table').appendChild(newNoRowMessage)
    }
