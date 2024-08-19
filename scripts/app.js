@@ -62,39 +62,44 @@ const handleButtonClick = e => {
    const main = document.querySelector('main')
    main.appendChild(table)
    displayDataInTable(movieData, category)
-   createSearchInput()
+   createSearchInput(category)
    createPageNavigation(movieData, category)
 }
 
-// Funkcja tworząca input search by id
-const createSearchInput = () => {
+// Funkcja tworząca input search
+const createSearchInput = category => {
    const searchInputContainer = document.createElement('div')
    searchInputContainer.classList.add('search-input-container')
    const visibleRows = document.querySelectorAll('tbody tr[data-row-data]')
    console.log('visibleRows', visibleRows)
-   const searchInputId = createInput('number', 'searchInputId', 'searchInputId', 'Please enter ID...', '1', '1000')
+   const searchInputId = createInput('number', 'searchInputId', 'searchInputId', 'Search by index', '1', '1000')
    const labelElementId = document.createElement('label')
    labelElementId.textContent = 'Search by index:'
    labelElementId.setAttribute('for', searchInputId.id)
    const amountRecords = document.createElement('p')
+   amountRecords.classList.add('amount-records')
    amountRecords.textContent = `Amount of records: ${visibleRows.length}`
+   const totalRecordsFound = document.createElement('p')
+   totalRecordsFound.textContent = 'Total records found: -'
+   totalRecordsFound.classList.add('total-records-found')
    const searchInputNameOrTitle = createInput(
       'string',
       'searchInputNameOrTitle',
       'searchInputNameOrTitle',
-      'Please enter name or title',
+      category === 'films' ? 'Search by title' : 'Search by name',
       '1',
       '1000',
    )
    const labelElementNameOrTitle = document.createElement('label')
-   labelElementNameOrTitle.textContent = 'Search by name/title:'
+   labelElementNameOrTitle.textContent = 'Search by text:'
    labelElementNameOrTitle.setAttribute('for', searchInputNameOrTitle.id)
    searchInputContainer.append(
+      amountRecords,
       labelElementId,
       searchInputId,
-      amountRecords,
       labelElementNameOrTitle,
       searchInputNameOrTitle,
+      totalRecordsFound,
    )
    const table = document.querySelector('table')
    table.parentNode.insertBefore(searchInputContainer, table) // Wstaw nowy element przed istniejącym
@@ -120,6 +125,7 @@ const handleSearchInput = (e, cellIndex, useIncludes) => {
       if (cell) {
          const cellValue = cell.textContent.toLowerCase()
          if (
+            // prettier-ignore
             useIncludes && cellValue.includes(inputValue) ||
             !useIncludes && cellValue === inputValue ||
             inputValue === ''
@@ -139,6 +145,12 @@ const handleSearchInput = (e, cellIndex, useIncludes) => {
       noRowCell.colSpan = 6
       newNoRowMessage.appendChild(noRowCell)
       document.querySelector('table').appendChild(newNoRowMessage)
+   }
+   // Dodaj informację o liczbie znalezionych rekordów
+   const visibleRows = document.querySelectorAll('tbody tr:not(.is-hidden)')
+   const totalRecords = document.querySelector('.total-records-found')
+   if (totalRecords) {
+      totalRecords.textContent = `Total records found: ${visibleRows.length}`
    }
 }
 
