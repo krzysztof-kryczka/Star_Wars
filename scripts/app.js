@@ -243,7 +243,7 @@ const getHeadersForCategory = (movieData, category) => {
 }
 
 // Funkcja wyświetlająca dane w tabeli
-const displayDataInTable = (movieData, category) => {
+const displayDataInTable = (movieData, category, itemsPerPage = 10) => {
    const tbody = document.querySelector('tbody')
    tbody.innerHTML = '' // Wyczyść zawartość tbody
    if (movieData.length === 0) {
@@ -251,7 +251,7 @@ const displayDataInTable = (movieData, category) => {
       displayNoDataMessage(tbody)
       return // Zakończ funkcję displayDataInTable, nie twórz wierszy
    }
-   movieData.forEach((item, index) => {
+   movieData.slice(0, itemsPerPage).forEach((item, index) => {
       const row = document.createElement('tr')
       const idCell = document.createElement('td')
       idCell.textContent = `${index + 1}`
@@ -333,7 +333,7 @@ const displayDataInTable = (movieData, category) => {
    })
 }
 
-const createPageNavigation = () => {
+const createPageNavigation = (movieData, category) => {
    const currentPage = 1
    const totalPages = 1
    const main = document.querySelector('main')
@@ -357,6 +357,9 @@ const createPageNavigation = () => {
    const selectOptions = [10, 20]
    const selectElement = createSelect(selectOptions)
    navBottomContainer.appendChild(selectElement)
+   selectElement.addEventListener('change', () =>
+      displayDataInTable(movieData, category, parseInt(selectElement.value)),
+   )
    main.appendChild(navBottomContainer)
 }
 
