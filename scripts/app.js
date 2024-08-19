@@ -345,32 +345,50 @@ const createPageNavigation = (movieData, category) => {
    // lewa strzałka
    const leftArrowButton = createButton('⬅️', 'leftArrowButton')
    navBottomContainer.appendChild(leftArrowButton)
+   leftArrowButton.addEventListener('click', () => {
+      if (currentPage > 1) {
+         currentPage--
+         currentPageInput.value = currentPage // Aktualizacja wartości inputa
+         displayDataInTable(movieData, category, currentPage)
+         const currentPageInfo = document.querySelector('.currentPageInfo')
+         currentPageInfo.textContent = ` z ${totalPages}`
+      }
+   })
    // input
    const currentPageInput = createInput('number', 'currentPageInput', 'currentPageInput', '1', '1', totalPages)
    navBottomContainer.appendChild(currentPageInput)
    // Dodaj obsługę zdarzenia zmiany wartości inputa
    currentPageInput.addEventListener('input', () => {
       const newPage = currentPageInput.value
-         if (newPage < 1) {
-            currentPage = 1
-         } else if (newPage > totalPages) {
-            currentPage = totalPages
-         } else {
-            currentPage = newPage
-         }
-         displayDataInTable(movieData, category, currentPage)
-         const currentPageInfo = document.querySelector('.currentPageInfo')
-         currentPageInfo.textContent = `${currentPage} z ${totalPages}`
+      if (newPage < 1) {
+         currentPage = 1
+      } else if (newPage > totalPages) {
+         currentPage = totalPages
+      } else {
+         currentPage = newPage
+      }
+      displayDataInTable(movieData, category, currentPage)
+      const currentPageInfo = document.querySelector('.currentPageInfo')
+      currentPageInfo.textContent = ` z ${totalPages}`
    })
    // bieżąca strona
    const currentPageInfo = document.createElement('span')
-   currentPageInfo.textContent = `${currentPage} z ${totalPages}`
+   currentPageInfo.textContent = ` z ${totalPages}`
    currentPageInfo.id = 'currentPageInfo'
    currentPageInfo.classList.add('currentPageInfo')
    navBottomContainer.appendChild(currentPageInfo)
    // prawa strzałka
    const rightArrowButton = createButton('➡️', 'rightArrowButton')
    navBottomContainer.appendChild(rightArrowButton)
+   rightArrowButton.addEventListener('click', () => {
+      if (currentPage < totalPages) {
+         currentPage++
+         currentPageInput.value = currentPage // Aktualizacja wartości inputa
+         displayDataInTable(movieData, category, currentPage)
+         const currentPageInfo = document.querySelector('.currentPageInfo')
+         currentPageInfo.textContent = ` z ${totalPages}`
+      }
+   })
    // select
    const selectOptions = [10, 20]
    const selectElement = createSelect(selectOptions)
