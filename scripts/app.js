@@ -351,15 +351,16 @@ const createPageNavigation = (movieData, category) => {
    // Dodaj obsługę zdarzenia zmiany wartości inputa
    currentPageInput.addEventListener('input', () => {
       const newPage = currentPageInput.value
-      if (newPage) {
-         // Aktualizuj bieżącą stronę i wyświetl dane
-         // Jeśli newPage przekracza totalPages, ustawiamy currentPage na totalPages.
-         // W przeciwnym razie ustawiamy currentPage na newPage.
-         currentPage = newPage > totalPages ? totalPages : newPage
+         if (newPage < 1) {
+            currentPage = 1
+         } else if (newPage > totalPages) {
+            currentPage = totalPages
+         } else {
+            currentPage = newPage
+         }
          displayDataInTable(movieData, category, currentPage)
          const currentPageInfo = document.querySelector('.currentPageInfo')
          currentPageInfo.textContent = `${currentPage} z ${totalPages}`
-      }
    })
    // bieżąca strona
    const currentPageInfo = document.createElement('span')
