@@ -12,11 +12,30 @@ const initializePage = () => {
 // Tworzenie nagłówka (section: header)
 const createHeader = () => {
    const header = document.createElement('header')
-   const title = document.createElement('h1')
-   title.textContent = 'Moja Strona Star Wars'
-   header.appendChild(title)
+   const div = createElement('div', '', 'header-container', 'header-container')
+   const character = createElement(
+      'p',
+      'Write <span class="hero">VADER</span> or <span class="hero">YODA</span>. You should be amazed!!!',
+      'character',
+      'character',
+   )
+   div.appendChild(character)
+   header.appendChild(div)
    document.body.appendChild(header)
 }
+
+// To hear something type 'vader' or 'yoda'
+let typedWord = null
+document.addEventListener('keydown', event => {
+   const vaderAudio = new Audio('./assets/audio/darth_vader.mp3')
+   const yodaAudio = new Audio('./assets/audio/Yoda_Yoda.mp3')
+   typedWord = `${typedWord}` + event.key.toLowerCase()
+   const playAudio = typedWord.includes('vader') ? vaderAudio : typedWord.includes('yoda') ? yodaAudio : null
+   if (playAudio) {
+      playAudio.play()
+      typedWord = null // Resetuj zmienną po odtworzeniu dźwięku
+   }
+})
 
 // Tworzenie sekcji głównej (section: main)
 const createMain = () => {
@@ -480,7 +499,7 @@ const createInput = (type, id, className, placeholder = 1, min = 1, max = 1) => 
 // Funkcja do tworzenia elementów takich jak span, p
 const createElement = (tagName, text, id, className) => {
    const element = document.createElement(tagName)
-   element.textContent = `${text}`
+   element.innerHTML = `${text}`
    element.id = `${id}`
    element.classList.add(className)
    return element
