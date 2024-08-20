@@ -349,8 +349,7 @@ const createPageNavigation = (movieData, category) => {
    selectElement.addEventListener('change', () => {
       itemsPerPage = parseInt(selectElement.value)
       totalPages = Math.ceil(movieData.length / itemsPerPage) // Aktualizacja totalPages
-      updatePageInfo(totalPages)
-      displayDataInTable(movieData, category, currentPage, itemsPerPage)
+      handlePageChange(movieData, category, currentPage, totalPages, itemsPerPage)
    })
    // lewa strzałka
    const leftArrowButton = createButton('⬅️', 'leftArrowButton')
@@ -384,14 +383,16 @@ const createPageNavigation = (movieData, category) => {
 }
 
 const handlePageChange = (movieData, category, newPage, totalPages, itemsPerPage) => {
-   let currentPage = null
-   if (newPage < 1) {
-      currentPage = 1
-   } else if (newPage > totalPages) {
-      currentPage = totalPages
-   } else {
-      currentPage = newPage
-   }
+   // let currentPage = null
+   // if (newPage < 1) {
+   //    currentPage = 1
+   // } else if (newPage > totalPages) {
+   //    currentPage = totalPages
+   // } else {
+   //    currentPage = newPage
+   // }
+   const currentPage = Math.min(Math.max(newPage, 1), totalPages)
+   updateArrowButtons(currentPage, totalPages)
    updatePageInfo(totalPages)
    displayDataInTable(movieData, category, currentPage, itemsPerPage)
 }
@@ -399,6 +400,14 @@ const handlePageChange = (movieData, category, newPage, totalPages, itemsPerPage
 const updatePageInfo = totalPages => {
    const currentPageInfo = document.querySelector('.currentPageInfo')
    currentPageInfo.textContent = ` z ${totalPages}`
+}
+
+// Funkcja aktualizująca stan przycisków strzałek
+const updateArrowButtons = (currentPage, totalPages) => {
+   const leftArrowButton = document.querySelector('.leftArrowButton')
+   leftArrowButton.disabled = currentPage === 1
+   const rightArrowButton = document.querySelector('.rightArrowButton')
+   rightArrowButton.disabled = currentPage === totalPages
 }
 
 // Dodawanie logo Star Wars
