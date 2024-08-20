@@ -264,16 +264,14 @@ const getHeadersForCategory = (movieData, category) => {
 // Funkcja wyświetlająca dane w tabeli
 const displayDataInTable = (movieData, category, currentPage = 1, itemsPerPage = 10) => {
    const tbody = document.querySelector('tbody')
-   tbody.innerHTML = '' // Wyczyść zawartość tbody
+   tbody.innerHTML = ''
    if (movieData.length === 0) {
-      // Wyświetla komunikat "Brak elementów do wyświetlenia"
       displayNoDataMessage(tbody)
-      return // Zakończ funkcję displayDataInTable, nie twórz wierszy
+      return
    }
-   console.log('(currentPage - 1) * itemsPerPage', (currentPage - 1) * itemsPerPage)
-   console.log('currentPage * itemsPerPage', currentPage * itemsPerPage)
-   console.log('slice', movieData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage))
-   movieData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).forEach((item, index) => {
+   const startIndex = (currentPage - 1) * itemsPerPage
+   const endIndex = currentPage * itemsPerPage
+   movieData.slice(startIndex, endIndex).forEach((item, index) => {
       const row = document.createElement('tr')
       const idCell = document.createElement('td')
       idCell.textContent = `${(currentPage - 1) * itemsPerPage + index + 1}`
@@ -281,44 +279,21 @@ const displayDataInTable = (movieData, category, currentPage = 1, itemsPerPage =
       console.log(item)
       // Wybierz dowolne 3 klucze (np. 'name', 'birth_year', 'gender')
       // Wybierz odpowiednie klucze w zależności od kategorii
-      let keysToShow = []
-      if (category === 'vehicles') {
-         keysToShow = [
-            Object.keys(item)[0], // NAME
-            Object.keys(item)[1], // MODEL
-            Object.keys(item)[2], // MANUFACTURER
-         ]
-      } else if (category === 'starships') {
-         keysToShow = [
-            Object.keys(item)[0], // NAME
-            Object.keys(item)[1], // MODEL
-            Object.keys(item)[2], // MANUFACTURER
-         ]
-      } else if (category === 'species') {
-         keysToShow = [
-            Object.keys(item)[0], // NAME
-            Object.keys(item)[1], // CLASSIFICATION
-            Object.keys(item)[2], // DESIGNATION
-         ]
-      } else if (category === 'planets') {
-         keysToShow = [
-            Object.keys(item)[0], // NAME
-            Object.keys(item)[1], // ROTATION_PERIOD
-            Object.keys(item)[2], // ORBITAL_PERIOD
-         ]
-      } else if (category === 'people') {
-         keysToShow = [
-            Object.keys(item)[0], // NAME
-            Object.keys(item)[1], // HEIGHT
-            Object.keys(item)[2], // MASS
-         ]
-      } else if (category === 'films') {
-         keysToShow = [
-            Object.keys(item)[0], // TITLE
-            Object.keys(item)[1], // EPISODE_ID
-            Object.keys(item)[2], // OPENING_CRAWL
-         ]
+      const categoryToKeysMap = {
+         // 'NAME', 'MODEL', 'MANUFACTURER'
+         vehicles: [Object.keys(item)[0], Object.keys(item)[1], Object.keys(item)[2]],
+         // 'NAME', 'MODEL', 'MANUFACTURER'
+         starships: [Object.keys(item)[0], Object.keys(item)[1], Object.keys(item)[2]],
+         // 'NAME', 'CLASSIFICATION', 'DESIGNATION'
+         species: [Object.keys(item)[0], Object.keys(item)[1], Object.keys(item)[2]],
+         // 'NAME', 'ROTATION_PERIOD', 'ORBITAL_PERIOD'
+         planets: [Object.keys(item)[0], Object.keys(item)[1], Object.keys(item)[2]],
+         // 'NAME', 'HEIGHT', 'MASS'
+         people: [Object.keys(item)[0], Object.keys(item)[1], Object.keys(item)[2]],
+         // 'TITLE', 'EPISODE_ID', 'OPENING_CRAWL'
+         films: [Object.keys(item)[0], Object.keys(item)[1], Object.keys(item)[2]],
       }
+      const keysToShow = categoryToKeysMap[category] || []
       for (const keyToShow of keysToShow) {
          const cell = createBasicStarWarsCell(item[keyToShow])
          row.appendChild(cell)
@@ -331,20 +306,8 @@ const displayDataInTable = (movieData, category, currentPage = 1, itemsPerPage =
       // Button cell
       const buttonCell = document.createElement('td')
       const removeAllButton = createButton('Remove all', 'remove-all-button')
-      // removeAllButton.style.display = 'none'
       removeAllButton.classList.add('is-hidden')
-      removeAllButton.addEventListener('click', () => {
-         const checkboxes = document.querySelectorAll('.checkbox')
-         checkboxes.forEach(checkbox => {
-            if (checkbox.checked) {
-               const row = checkbox.closest('tr') // Znajdź rodzica (wiersz) checkboxa
-               console.log('Usnięty wiersz to: ', row)
-               row.remove() // Usuń wiersz
-            }
-         })
-         checkEmptyTable() // Sprawdź, czy tabela jest pusta
-         updateSearchInput() // zaktualizuj Search Input po sunięciu wiersza
-      })
+      removeAllButton.addEventListener('click', handleRemoveAllButton)
       buttonCell.appendChild(removeAllButton)
       row.appendChild(buttonCell)
       // Actions Cell
@@ -553,6 +516,20 @@ const createActionsCell = row => {
    return createdCell
 }
 
+// Funkcja do usuwania zaznaczonych wierszy
+const handleRemoveAllButton = () => {
+   const checkboxes = document.querySelectorAll('.checkbox')
+   checkboxes.forEach(checkbox => {
+      if (checkbox.checked) {
+         const row = checkbox.closest('tr') // Znajdź rodzica (wiersz) checkboxa
+         console.log('Usnięty wiersz to: ', row)
+         row.remove() // Usuń wiersz
+      }
+   })
+   checkEmptyTable() // Sprawdź, czy tabela jest pusta
+   updateSearchInput() // zaktualizuj Search Input po sunięciu wiersza
+}
+
 // Funkcja do usuwania pojedynczego wiersza
 const removeRow = row => {
    // Znajdź wiersz, który ma być usunięty
@@ -571,8 +548,8 @@ const displayNoDataMessage = tbody => {
    const noDataMessage = document.createElement('tr')
    noDataMessage.innerHTML = '<td colspan="6">Brak elementów do wyświetlenia</td>'
    tbody.appendChild(noDataMessage)
-   const pagination = document.querySelector('.pagination')
-   pagination?.remove()
+   // const pagination = document.querySelector('.pagination')
+   // pagination?.remove()
    const previousSearchInput = document.querySelector('.search-input-container')
    previousSearchInput?.remove()
 }
