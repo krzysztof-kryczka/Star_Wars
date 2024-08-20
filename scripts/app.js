@@ -338,65 +338,67 @@ const displayDataInTable = (movieData, category, currentPage = 1, itemsPerPage =
 
 const createPageNavigation = (movieData, category) => {
    let currentPage = 1
-   const totalPages = Math.ceil(movieData.length / 10)
    const main = document.querySelector('main')
    const navBottomContainer = document.createElement('div')
    navBottomContainer.classList.add('pagination')
+   // select element
+   const selectOptions = [10, 20]
+   const selectElement = createSelect(selectOptions)
+   let itemsPerPage = parseInt(selectElement.value)
+   let totalPages = Math.ceil(movieData.length / itemsPerPage)
+   selectElement.addEventListener('change', () => {
+      itemsPerPage = parseInt(selectElement.value)
+      totalPages = Math.ceil(movieData.length / itemsPerPage) // Aktualizacja totalPages
+      updatePageInfo(totalPages)
+      displayDataInTable(movieData, category, currentPage, itemsPerPage)
+   })
    // lewa strzałka
    const leftArrowButton = createButton('⬅️', 'leftArrowButton')
-   navBottomContainer.appendChild(leftArrowButton)
    leftArrowButton.addEventListener('click', () => {
       if (currentPage > 1) {
          currentPage--
-         currentPageInput.value = currentPage // Aktualizacja wartości inputa
-         displayDataInTable(movieData, category, currentPage)
-         const currentPageInfo = document.querySelector('.currentPageInfo')
-         currentPageInfo.textContent = ` z ${totalPages}`
+         currentPageInput.value = currentPage
+         handlePageChange(movieData, category, currentPage, totalPages, itemsPerPage)
       }
    })
    // input
    const currentPageInput = createInput('number', 'currentPageInput', 'currentPageInput', '1', '1', totalPages)
-   navBottomContainer.appendChild(currentPageInput)
    // Dodaj obsługę zdarzenia zmiany wartości inputa
    currentPageInput.addEventListener('input', () => {
       const newPage = currentPageInput.value
-      if (newPage < 1) {
-         currentPage = 1
-      } else if (newPage > totalPages) {
-         currentPage = totalPages
-      } else {
-         currentPage = newPage
-      }
-      displayDataInTable(movieData, category, currentPage)
-      const currentPageInfo = document.querySelector('.currentPageInfo')
-      currentPageInfo.textContent = ` z ${totalPages}`
+      handlePageChange(movieData, category, newPage, totalPages, itemsPerPage)
    })
    // bieżąca strona
-   const currentPageInfo = document.createElement('span')
-   currentPageInfo.textContent = ` z ${totalPages}`
-   currentPageInfo.id = 'currentPageInfo'
-   currentPageInfo.classList.add('currentPageInfo')
-   navBottomContainer.appendChild(currentPageInfo)
+   const currentPageInfo = createElement('span', ` z ${totalPages}`, 'currentPageInfo', 'currentPageInfo')
    // prawa strzałka
    const rightArrowButton = createButton('➡️', 'rightArrowButton')
-   navBottomContainer.appendChild(rightArrowButton)
    rightArrowButton.addEventListener('click', () => {
       if (currentPage < totalPages) {
          currentPage++
-         currentPageInput.value = currentPage // Aktualizacja wartości inputa
-         displayDataInTable(movieData, category, currentPage)
-         const currentPageInfo = document.querySelector('.currentPageInfo')
-         currentPageInfo.textContent = ` z ${totalPages}`
+         currentPageInput.value = currentPage
+         handlePageChange(movieData, category, currentPage, totalPages, itemsPerPage)
       }
    })
-   // select
-   const selectOptions = [10, 20]
-   const selectElement = createSelect(selectOptions)
-   navBottomContainer.appendChild(selectElement)
-   selectElement.addEventListener('change', () =>
-      displayDataInTable(movieData, category, currentPage, parseInt(selectElement.value)),
-   )
+   navBottomContainer.append(leftArrowButton, currentPageInput, currentPageInfo, rightArrowButton, selectElement)
    main.appendChild(navBottomContainer)
+}
+
+const handlePageChange = (movieData, category, newPage, totalPages, itemsPerPage) => {
+   let currentPage = null
+   if (newPage < 1) {
+      currentPage = 1
+   } else if (newPage > totalPages) {
+      currentPage = totalPages
+   } else {
+      currentPage = newPage
+   }
+   updatePageInfo(totalPages)
+   displayDataInTable(movieData, category, currentPage, itemsPerPage)
+}
+
+const updatePageInfo = totalPages => {
+   const currentPageInfo = document.querySelector('.currentPageInfo')
+   currentPageInfo.textContent = ` z ${totalPages}`
 }
 
 // Dodawanie logo Star Wars
@@ -444,7 +446,7 @@ const createCheckbox = () => {
    return checkbox
 }
 
-function createSelect(options) {
+const createSelect = options => {
    const select = document.createElement('select')
    for (const optionValue of options) {
       const option = document.createElement('option')
@@ -455,7 +457,7 @@ function createSelect(options) {
    return select
 }
 
-function createInput(type, id, className, placeholder = 1, min = 1, max = 1) {
+const createInput = (type, id, className, placeholder = 1, min = 1, max = 1) => {
    const input = document.createElement('input')
    input.type = `${type}`
    input.placeholder = `${placeholder}`
@@ -464,6 +466,15 @@ function createInput(type, id, className, placeholder = 1, min = 1, max = 1) {
    input.min = `${min}`
    input.max = `${max}`
    return input
+}
+
+// Funkcja do tworzenia elementów takich jak span, p
+const createElement = (tagName, text, id, className) => {
+   const element = document.createElement(tagName)
+   element.textContent = `${text}`
+   element.id = `${id}`
+   element.classList.add(className)
+   return element
 }
 
 // Funkcja do tworzenia komórek tabeli z API SW
