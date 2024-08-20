@@ -183,7 +183,7 @@ const createTable = (movieData, category) => {
    const headerRow = document.createElement('tr')
    for (const header of headers) {
       const th = document.createElement('th')
-      th.textContent = `${header}`
+      th.textContent = `${header.toUpperCase()}`
       headerRow.appendChild(th)
    }
    // Dodatkowy nagłówek dla przycisku Remove All
@@ -194,71 +194,58 @@ const createTable = (movieData, category) => {
    // Wstaw nowy nagłówek przed ostatnim nagłówkiem
    headerRow.insertBefore(additionalHeader, lastHeader)
    thead.appendChild(headerRow)
-   table.appendChild(thead)
-   table.appendChild(tbody)
+   table.append(thead, tbody)
    return table
 }
 
 // Funkcja zwracająca nagłówki na podstawie kategorii
 const getHeadersForCategory = (movieData, category) => {
-   switch (category) {
-      case 'vehicles':
-         return [
-            'ID',
-            Object.keys(movieData[0])[0].toUpperCase(), // NAME
-            Object.keys(movieData[0])[1].toUpperCase(), // MODEL
-            Object.keys(movieData[0])[2].toUpperCase(), // MANUFACTURER
-            'CREATED',
-            'ACTIONS',
-         ]
-      case 'starships':
-         return [
-            'ID',
-            Object.keys(movieData[0])[0].toUpperCase(), // NAME
-            Object.keys(movieData[0])[1].toUpperCase(), // MODEL
-            Object.keys(movieData[0])[2].toUpperCase(), // MANUFACTURER
-            'CREATED',
-            'ACTIONS',
-         ]
-      case 'species':
-         return [
-            'ID',
-            Object.keys(movieData[0])[0].toUpperCase(), // NAME
-            Object.keys(movieData[0])[1].toUpperCase(), // CLASSIFICATION
-            Object.keys(movieData[0])[2].toUpperCase(), // DESIGNATION
-            'CREATED',
-            'ACTIONS',
-         ]
-      case 'planets':
-         return [
-            'ID',
-            Object.keys(movieData[0])[0].toUpperCase(), // NAME
-            Object.keys(movieData[0])[1].toUpperCase().split('_').join(' '), // ROTATION PERIOD
-            Object.keys(movieData[0])[2].toUpperCase().split('_').join(' '), // 'ORBITAL PERIOD'
-            'CREATED',
-            'ACTIONS',
-         ]
-      case 'people':
-         return [
-            'ID',
-            Object.keys(movieData[0])[0].toUpperCase(), // NAME
-            Object.keys(movieData[0])[1].toUpperCase(), // HEIGHT
-            Object.keys(movieData[0])[2].toUpperCase(), // MASS
-            'CREATED',
-            'ACTIONS',
-         ]
-      case 'films':
-         return [
-            'ID',
-            Object.keys(movieData[0])[0].toUpperCase(), // TITLE
-            Object.keys(movieData[0])[1].toUpperCase().split('_').join(' '), // 'EPISODE ID
-            Object.keys(movieData[0])[2].toUpperCase().split('_').join(' '), // 'OPENING CRAWL'
-            'CREATED',
-            'ACTIONS',
-         ]
-      default:
-         return [] // Zwracamy pustą tablicę dla nieznanej kategorii
+   const headersCreatedActions = ['CREATED', 'ACTIONS']
+   const keyMapping = {
+      vehicles: [
+         'ID',
+         Object.keys(movieData[0])[0], // NAME
+         Object.keys(movieData[0])[1], // MODEL
+         Object.keys(movieData[0])[2], // MANUFACTURER
+         ...headersCreatedActions,
+      ],
+      starships: [
+         'ID',
+         Object.keys(movieData[0])[0], // NAME
+         Object.keys(movieData[0])[1], // MODEL
+         Object.keys(movieData[0])[2], // MANUFACTURER
+         ...headersCreatedActions,
+      ],
+      species: [
+         'ID',
+         Object.keys(movieData[0])[0], // NAME
+         Object.keys(movieData[0])[1], // CLASSIFICATION
+         Object.keys(movieData[0])[2], // DESIGNATION
+         ...headersCreatedActions,
+      ],
+      planets: [
+         'ID',
+         Object.keys(movieData[0])[0], // NAME
+         Object.keys(movieData[0])[1].split('_').join(' '), // ROTATION PERIOD
+         Object.keys(movieData[0])[2].split('_').join(' '), // 'ORBITAL PERIOD'
+         ...headersCreatedActions,
+      ],
+      people: [
+         'ID',
+         Object.keys(movieData[0])[0], // NAME
+         Object.keys(movieData[0])[1], // HEIGHT
+         Object.keys(movieData[0])[2], // MASS
+         ...headersCreatedActions,
+      ],
+      films: [
+         'ID',
+         Object.keys(movieData[0])[0], // TITLE
+         Object.keys(movieData[0])[1].split('_').join(' '), // 'EPISODE ID
+         Object.keys(movieData[0])[2].split('_').join(' '), // 'OPENING CRAWL'
+         ...headersCreatedActions,
+      ],
    }
+   return keyMapping[category] || []
 }
 
 // Funkcja wyświetlająca dane w tabeli
