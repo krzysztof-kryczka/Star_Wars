@@ -470,7 +470,7 @@ const createActionsCell = row => {
    const createdCell = document.createElement('td')
    const trashButton = createButton('REMOVE')
    trashButton.addEventListener('click', () => {
-      removeRow(row)
+      removeRows([row])
    })
    const infoButton = createButton('INFO', 'info-button')
    infoButton.setAttribute('data-target', 'data-modal-open')
@@ -506,28 +506,26 @@ const createActionsCell = row => {
 // Funkcja do usuwania zaznaczonych wierszy
 const handleRemoveAllButton = () => {
    const checkboxes = document.querySelectorAll('.checkbox')
+   const selectedRows = []
    checkboxes.forEach(checkbox => {
       if (checkbox.checked) {
-         const row = checkbox.closest('tr') // Znajdź rodzica (wiersz) checkboxa
-         console.log('Usnięty wiersz to: ', row)
-         row.remove() // Usuń wiersz
+         // Dla każdego zaznaczonego checkboxa znajdujemy jego najbliższego rodzica o tagu <tr>
+         const row = checkbox.closest('tr')
+         selectedRows.push(row)
       }
    })
-   checkEmptyTable() // Sprawdź, czy tabela jest pusta
-   updateSearchInput() // zaktualizuj Search Input po sunięciu wiersza
+   removeRows(selectedRows)
 }
 
-// Funkcja do usuwania pojedynczego wiersza
-const removeRow = row => {
-   // Znajdź wiersz, który ma być usunięty
-   // const rowToRemove = trashButton.parentNode.parentNode // Dwa poziomy wyżej do elementu <tr>
-   // console.log(rowToRemove)
+// Główna funkcja do usuwania wierszy
+const removeRows = rowsToRemove => {
    const tbody = document.querySelector('tbody')
-   console.log(tbody)
-   console.log(row)
-   tbody.removeChild(row)
+   rowsToRemove.forEach(row => {
+      tbody.removeChild(row)
+      console.log('Usunięty wiersz to: ', row)
+   })
    checkEmptyTable() // Sprawdź, czy tabela jest pusta
-   updateSearchInput() // zaktualizuj Search Input po sunięciu wiersza
+   updateSearchInput() // Zaktualizuj pole wyszukiwania po usunięciu wiersza
 }
 
 // Funkcja wyświetlająca komunikat "Brak elementów do wyświetlenia"
