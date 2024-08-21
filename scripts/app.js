@@ -9,6 +9,10 @@ const initializePage = () => {
    createFooter()
 }
 
+let currentPage = 1
+let itemsPerPage = 10
+let totalPages = 1
+
 // Tworzenie nagłówka (section: header)
 const createHeader = () => {
    const header = document.createElement('header')
@@ -82,7 +86,7 @@ const handleButtonClick = e => {
    main.appendChild(table)
    createSearchInput(category)
    displayPage(1, 10)
-   createPageNavigation(movieData, category)
+   createPageNavigation()
 }
 
 // Funkcja do wyświetlania ograniczonej liczby rekordów
@@ -317,28 +321,38 @@ const generateBodyTable = (movieData, category) => {
    return tbody
 }
 
-const createPageNavigation = (movieData, category) => {
-   let currentPage = 1
+// Funkcja tworząca paginację
+const createPageNavigation = () => {
+   const myTable = document.querySelectorAll('tr[data-row-data]')
    const main = document.querySelector('main')
    const navBottomContainer = document.createElement('div')
    navBottomContainer.classList.add('pagination')
    // select element
    const selectOptions = [10, 20]
    const selectElement = createSelect(selectOptions)
-   let itemsPerPage = parseInt(selectElement.value)
-   let totalPages = Math.ceil(movieData.length / itemsPerPage)
+   itemsPerPage = parseInt(selectElement.value)
+   totalPages = Math.ceil(myTable.length / itemsPerPage)
    selectElement.addEventListener('change', () => {
       itemsPerPage = parseInt(selectElement.value)
-      totalPages = Math.ceil(movieData.length / itemsPerPage) // Aktualizacja totalPages
-      handlePageChange(movieData, category, currentPage, totalPages, itemsPerPage)
+      switch (itemsPerPage) {
+         case 20:
+            currentPageInput.value = --currentPage
+            break
+         case 10:
+            currentPageInput.value = ++currentPage
+            break
+         default:
+            break
+      }
+      totalPages = Math.ceil(myTable.length / itemsPerPage) // Aktualizacja totalPages
+      handlePageChange(currentPage, totalPages, itemsPerPage)
    })
-   // lewa strzałka
-   const leftArrowButton = createButton('⬅️', 'leftArrowButton')
-   leftArrowButton.addEventListener('click', () => {
+   const prevButton = createButton('⬅️', 'prevButton')
+   prevButton.addEventListener('click', () => {
       if (currentPage > 1) {
          currentPage--
          currentPageInput.value = currentPage
-         handlePageChange(movieData, category, currentPage, totalPages, itemsPerPage)
+         handlePageChange(currentPage, totalPages, itemsPerPage)
       }
    })
    // input
@@ -346,24 +360,23 @@ const createPageNavigation = (movieData, category) => {
    // Dodaj obsługę zdarzenia zmiany wartości inputa
    currentPageInput.addEventListener('input', () => {
       const newPage = currentPageInput.value
-      handlePageChange(movieData, category, newPage, totalPages, itemsPerPage)
+      handlePageChange(newPage, totalPages, itemsPerPage)
    })
    // bieżąca strona
    const currentPageInfo = createElement('span', ` z ${totalPages}`, 'currentPageInfo', 'currentPageInfo')
-   // prawa strzałka
-   const rightArrowButton = createButton('➡️', 'rightArrowButton')
-   rightArrowButton.addEventListener('click', () => {
+   const nextButton = createButton('➡️', 'nextButton')
+   nextButton.addEventListener('click', () => {
       if (currentPage < totalPages) {
          currentPage++
          currentPageInput.value = currentPage
-         handlePageChange(movieData, category, currentPage, totalPages, itemsPerPage)
+         handlePageChange(currentPage, totalPages, itemsPerPage)
       }
    })
-   navBottomContainer.append(leftArrowButton, currentPageInput, currentPageInfo, rightArrowButton, selectElement)
+   navBottomContainer.append(prevButton, currentPageInput, currentPageInfo, nextButton, selectElement)
    main.appendChild(navBottomContainer)
 }
 
-const handlePageChange = (movieData, category, newPage, totalPages, itemsPerPage) => {
+const handlePageChange = (newPage, totalPages, itemsPerPage) => {
    // let currentPage = null
    // if (newPage < 1) {
    //    currentPage = 1
@@ -372,23 +385,47 @@ const handlePageChange = (movieData, category, newPage, totalPages, itemsPerPage
    // } else {
    //    currentPage = newPage
    // }
-   const currentPage = Math.min(Math.max(newPage, 1), totalPages)
+   currentPage = Math.min(Math.max(newPage, 1), totalPages)
    updateArrowButtons(currentPage, totalPages)
    updatePageInfo(totalPages)
-   displayDataInTable(movieData, category, currentPage, itemsPerPage)
+   displayPage(currentPage, itemsPerPage)
 }
 
 const updatePageInfo = totalPages => {
    const currentPageInfo = document.querySelector('.currentPageInfo')
    currentPageInfo.textContent = ` z ${totalPages}`
+   const currentPageInput = document.querySelector('.currentPageInput')
+   currentPageInput.max = parseInt(totalPages)
+   if (currentPageInput.value > totalPages) {
+      currentPageInput.value = totalPages
+   }
 }
 
 // Funkcja aktualizująca stan przycisków strzałek
 const updateArrowButtons = (currentPage, totalPages) => {
-   const leftArrowButton = document.querySelector('.leftArrowButton')
-   leftArrowButton.disabled = currentPage === 1
-   const rightArrowButton = document.querySelector('.rightArrowButton')
-   rightArrowButton.disabled = currentPage === totalPages
+   const prevButton = document.querySelector('.prevButton ')
+   prevButton.disabled = currentPage === 1
+   const nextButton = document.querySelector('.nextButton')
+   nextButton.disabled = currentPage === totalPages
+}
+
+// Funkcja aktualizująca stan paginacji po usuwaniu wierszy
+const updatePagination = () => {
+   const rows = document.querySelectorAll('tr[data-row-data]')
+   totalPages = Math.ceil(rows.length / itemsPerPage)
+   const currentPageInfo = document.querySelector('.currentPageInfo')
+   currentPageInfo.textContent = ` z ${totalPages}`
+   const remainingRows = document.querySelectorAll('tr[data-row-data]:not(.is-hidden)').length
+   // Sprawdź, czy jesteśmy na ostatniej stronie
+   if (currentPage > totalPages && remainingRows === 0) {
+      currentPage-- // Przenieś się na poprzednią stronę
+      const currentPageInput = document.querySelector('.currentPageInput')
+      currentPageInput.value = currentPage // Zaktualizuj input z numerem strony
+      displayPage(currentPage, itemsPerPage)
+      // Sprawdź, czy jesteśmy na innej stronie niż ostatnia
+   } else if (currentPage < totalPages && remainingRows === 0) {
+      displayPage(currentPage, itemsPerPage)
+   }
 }
 
 // Dodawanie logo Star Wars
@@ -536,6 +573,7 @@ const removeRows = rowsToRemove => {
       tbody.removeChild(row)
       console.log('Usunięty wiersz to: ', row)
    })
+   updatePagination() // Zaktualizuj liczbę stron jeśli trzeba
    checkEmptyTable() // Sprawdź, czy tabela jest pusta
    updateSearchInput() // Zaktualizuj pole wyszukiwania po usunięciu wiersza
 }
