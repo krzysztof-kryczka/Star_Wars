@@ -80,9 +80,23 @@ const handleButtonClick = e => {
    const table = createTable(movieData, category)
    const main = document.querySelector('main')
    main.appendChild(table)
-   displayDataInTable(movieData, category)
    createSearchInput(category)
+   displayPage(1, 10)
    createPageNavigation(movieData, category)
+}
+
+// Funkcja do wyświetlania ograniczonej liczby rekordów
+const displayPage = (currentPage, itemsPerPage) => {
+   const items = document.querySelectorAll('tr[data-row-data]')
+   const startIndex = (currentPage - 1) * itemsPerPage
+   const endIndex = currentPage * itemsPerPage
+   items.forEach((row, index) => {
+      if (index >= startIndex && index < endIndex) {
+         row.classList.remove('is-hidden') // Pokazujemy wiersze na danej stronie
+      } else {
+         row.classList.add('is-hidden') // Ukrywamy pozostałe wiersze
+      }
+   })
 }
 
 // Funkcja tworząca input search
@@ -177,7 +191,6 @@ const handleSearchInput = (e, cellIndex, useIncludes) => {
 const createTable = (movieData, category) => {
    const table = document.createElement('table')
    const thead = document.createElement('thead')
-   const tbody = document.createElement('tbody')
    // Nagłówki zależne od kategorii przycisku
    const headers = getHeadersForCategory(movieData, category)
    const headerRow = document.createElement('tr')
@@ -194,6 +207,7 @@ const createTable = (movieData, category) => {
    // Wstaw nowy nagłówek przed ostatnim nagłówkiem
    headerRow.insertBefore(additionalHeader, lastHeader)
    thead.appendChild(headerRow)
+   const tbody = generateBodyTable(movieData, category)
    table.append(thead, tbody)
    return table
 }
@@ -248,22 +262,19 @@ const getHeadersForCategory = (movieData, category) => {
    return keyMapping[category] || []
 }
 
-// Funkcja wyświetlająca dane w tabeli
-const displayDataInTable = (movieData, category, currentPage = 1, itemsPerPage = 10) => {
-   const tbody = document.querySelector('tbody')
+// Funkcja generująca tbody na podstawie obiektu movieData
+const generateBodyTable = (movieData, category) => {
+   const tbody = document.createElement('tbody')
    tbody.innerHTML = ''
    if (movieData.length === 0) {
       displayNoDataMessage(tbody)
       return
    }
-   const startIndex = (currentPage - 1) * itemsPerPage
-   const endIndex = currentPage * itemsPerPage
-   movieData.slice(startIndex, endIndex).forEach((item, index) => {
+   movieData.forEach((item, index) => {
       const row = document.createElement('tr')
       const idCell = document.createElement('td')
-      idCell.textContent = `${(currentPage - 1) * itemsPerPage + index + 1}`
+      idCell.textContent = `${index + 1}`
       row.appendChild(idCell)
-      console.log(item)
       // Wybierz dowolne 3 klucze (np. 'name', 'birth_year', 'gender')
       // Wybierz odpowiednie klucze w zależności od kategorii
       const categoryToKeysMap = {
@@ -303,6 +314,7 @@ const displayDataInTable = (movieData, category, currentPage = 1, itemsPerPage =
       row.appendChild(actionsCell)
       tbody.appendChild(row)
    })
+   return tbody
 }
 
 const createPageNavigation = (movieData, category) => {
