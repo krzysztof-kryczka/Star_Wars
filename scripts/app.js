@@ -80,6 +80,18 @@ const handleButtonClick = e => {
    // Pobierz nazwę kategorii z przycisku
    const category = e.target.getAttribute('data-category')
    // Pobierz dane na podstawie nazwy przycisku
+   const clickedButton = e.target
+   const isActive = clickedButton.classList.contains('is-active')
+   if (isActive) {
+      clickedButton.classList.remove('is-active')
+   } else {
+      // Usuń klasę "is-active" ze wszystkich przycisków
+      const allButtons = document.querySelectorAll('.sw-button')
+      allButtons.forEach(button => button.classList.remove('is-active'))
+      // Dodaj klasę "is-active" tylko do klikniętego przycisku
+      clickedButton.classList.add('is-active')
+   }
+
    const movieData = rowData[category]
    const table = createTable(movieData, category)
    const main = document.querySelector('main')
@@ -87,6 +99,7 @@ const handleButtonClick = e => {
    createSearchInput(category)
    displayPage(1, 10)
    createPageNavigation()
+   updateArrowButtons(currentPage, totalPages)
 }
 
 // Funkcja do wyświetlania ograniczonej liczby rekordów
@@ -109,20 +122,26 @@ const createSearchInput = category => {
    searchInputContainer.classList.add('search-input-container')
    const visibleRows = document.querySelectorAll('tbody tr[data-row-data]')
    console.log('visibleRows', visibleRows)
-   const searchInputId = createInput('number', 'searchInputId', 'searchInputId', 'Search by index', '1', '1000')
+   const searchInputId = createInput('number', 'searchInputId', 'search-input-id', 'index', '1', '1000')
    const labelElementId = document.createElement('label')
    labelElementId.textContent = 'Search by index:'
    labelElementId.setAttribute('for', searchInputId.id)
-   const amountRecords = document.createElement('p')
-   amountRecords.classList.add('amount-records')
-   amountRecords.textContent = `Amount of records: ${visibleRows.length}`
-   const totalRecordsFound = document.createElement('p')
-   totalRecordsFound.textContent = 'Total records found: -'
-   totalRecordsFound.classList.add('total-records-found')
+   const amountRecords = createElement(
+      'p',
+      `Amount of records: <span class="total">${visibleRows.length}</span>`,
+      'amount-records',
+      'amount-records',
+   )
+   const totalRecordsFound = createElement(
+      'p',
+      'Total records found: <span class="total">0</span>',
+      'total-records-found',
+      'total-records-found',
+   )
    const searchInputNameOrTitle = createInput(
       'string',
       'searchInputNameOrTitle',
-      'searchInputNameOrTitle',
+      'search-input-text',
       category === 'films' ? 'Search by title' : 'Search by name',
       '1',
       '1000',
@@ -179,7 +198,7 @@ const handleSearchInput = (e, cellIndex, useIncludes) => {
       newNoRowMessage.classList.add('no-row-message')
       const noRowCell = document.createElement('td')
       noRowCell.textContent = 'Nie znaleziono pasującego wiersza.'
-      noRowCell.colSpan = 6
+      noRowCell.colSpan = 7
       newNoRowMessage.appendChild(noRowCell)
       document.querySelector('table').appendChild(newNoRowMessage)
    }
@@ -187,7 +206,7 @@ const handleSearchInput = (e, cellIndex, useIncludes) => {
    const visibleRows = document.querySelectorAll('tbody tr:not(.is-hidden)')
    const totalRecords = document.querySelector('.total-records-found')
    if (totalRecords) {
-      totalRecords.textContent = `Total records found: ${visibleRows.length}`
+      totalRecords.innerHTML = `Total records found: <span class='total'>${visibleRows.length}</span>`
    }
 }
 
@@ -307,7 +326,7 @@ const generateBodyTable = (movieData, category) => {
       row.appendChild(createdCell)
       // Button cell
       const buttonCell = document.createElement('td')
-      const removeAllButton = createButton('Remove all', 'remove-all-button')
+      const removeAllButton = createButton('Remove all', 'remove-all-button', 'remove-all-button')
       removeAllButton.classList.add('is-hidden')
       removeAllButton.addEventListener('click', handleRemoveAllButton)
       buttonCell.appendChild(removeAllButton)
@@ -336,7 +355,13 @@ const createPageNavigation = () => {
       itemsPerPage = parseInt(selectElement.value)
       switch (itemsPerPage) {
          case 20:
-            currentPageInput.value = --currentPage
+            --currentPage
+            if (currentPage === 0) {
+               currentPageInput.value = 1
+            } else {
+               currentPageInput.value = currentPage
+            }
+
             break
          case 10:
             currentPageInput.value = ++currentPage
@@ -347,7 +372,7 @@ const createPageNavigation = () => {
       totalPages = Math.ceil(myTable.length / itemsPerPage) // Aktualizacja totalPages
       handlePageChange(currentPage, totalPages, itemsPerPage)
    })
-   const prevButton = createButton('⬅️', 'prevButton')
+   const prevButton = createButton('<i class="fa-solid fa-chevron-left"></i>', 'prevButton')
    prevButton.addEventListener('click', () => {
       if (currentPage > 1) {
          currentPage--
@@ -356,15 +381,15 @@ const createPageNavigation = () => {
       }
    })
    // input
-   const currentPageInput = createInput('number', 'currentPageInput', 'currentPageInput', '1', '1', totalPages)
+   const currentPageInput = createInput('number', 'currentPageInput', 'current-page-input', '1', '1', totalPages)
    // Dodaj obsługę zdarzenia zmiany wartości inputa
    currentPageInput.addEventListener('input', () => {
       const newPage = currentPageInput.value
       handlePageChange(newPage, totalPages, itemsPerPage)
    })
    // bieżąca strona
-   const currentPageInfo = createElement('span', ` z ${totalPages}`, 'currentPageInfo', 'currentPageInfo')
-   const nextButton = createButton('➡️', 'nextButton')
+   const currentPageInfo = createElement('span', ` z ${totalPages}`, 'currentPageInfo', 'current-page-info')
+   const nextButton = createButton('<i class="fa-solid fa-chevron-right"></i>', 'nextButton')
    nextButton.addEventListener('click', () => {
       if (currentPage < totalPages) {
          currentPage++
@@ -392,9 +417,9 @@ const handlePageChange = (newPage, totalPages, itemsPerPage) => {
 }
 
 const updatePageInfo = totalPages => {
-   const currentPageInfo = document.querySelector('.currentPageInfo')
+   const currentPageInfo = document.querySelector('#currentPageInfo')
    currentPageInfo.textContent = ` z ${totalPages}`
-   const currentPageInput = document.querySelector('.currentPageInput')
+   const currentPageInput = document.querySelector('#currentPageInput')
    currentPageInput.max = parseInt(totalPages)
    if (currentPageInput.value > totalPages) {
       currentPageInput.value = totalPages
@@ -413,13 +438,13 @@ const updateArrowButtons = (currentPage, totalPages) => {
 const updatePagination = () => {
    const rows = document.querySelectorAll('tr[data-row-data]')
    totalPages = Math.ceil(rows.length / itemsPerPage)
-   const currentPageInfo = document.querySelector('.currentPageInfo')
+   const currentPageInfo = document.querySelector('#currentPageInfo')
    currentPageInfo.textContent = ` z ${totalPages}`
    const remainingRows = document.querySelectorAll('tr[data-row-data]:not(.is-hidden)').length
    // Sprawdź, czy jesteśmy na ostatniej stronie
    if (currentPage > totalPages && remainingRows === 0) {
       currentPage-- // Przenieś się na poprzednią stronę
-      const currentPageInput = document.querySelector('.currentPageInput')
+      const currentPageInput = document.querySelector('#currentPageInput')
       currentPageInput.value = currentPage // Zaktualizuj input z numerem strony
       displayPage(currentPage, itemsPerPage)
       // Sprawdź, czy jesteśmy na innej stronie niż ostatnia
@@ -517,11 +542,12 @@ const createBasicStarWarsCell = text => {
 // Funkcja do tworzenia komórki tabeli Actions
 const createActionsCell = row => {
    const createdCell = document.createElement('td')
-   const trashButton = createButton('REMOVE')
+   const buttonContainer = createElement('div', '', 'buttonsInTD', 'buttons-td')
+   const trashButton = createButton('<i class="fa-solid fa-trash-can"></i>', 'remove-button')
    trashButton.addEventListener('click', () => {
       removeRows([row])
    })
-   const infoButton = createButton('INFO', 'info-button')
+   const infoButton = createButton('<i class="fa-solid fa-plus"></i>', 'info-button')
    infoButton.setAttribute('data-target', 'data-modal-open')
    infoButton.addEventListener('click', () => {
       const { rowData } = row.dataset
@@ -545,10 +571,8 @@ const createActionsCell = row => {
       //    : removeAllButton.classList.add('is-hidden')
       removeAllButton.classList.toggle('is-hidden', checkedCheckboxes.length === 0)
    })
-   // createdCell.appendChild(trashButton)
-   // createdCell.appendChild(infoButton)
-   // createdCell.appendChild(checkbox)
-   createdCell.append(trashButton, infoButton, checkbox)
+   buttonContainer.append(trashButton, infoButton, checkbox) // Dodaj przyciski do kontenera
+   createdCell.appendChild(buttonContainer) // Dodaj kontener do komórki
    return createdCell
 }
 
@@ -581,12 +605,13 @@ const removeRows = rowsToRemove => {
 // Funkcja wyświetlająca komunikat "Brak elementów do wyświetlenia"
 const displayNoDataMessage = tbody => {
    const noDataMessage = document.createElement('tr')
-   noDataMessage.innerHTML = '<td colspan="6">Brak elementów do wyświetlenia</td>'
+   noDataMessage.innerHTML = '<td colspan="7">Brak elementów do wyświetlenia</td>'
+   noDataMessage.classList.add('no-row-message')
    tbody.appendChild(noDataMessage)
-   // const pagination = document.querySelector('.pagination')
-   // pagination?.remove()
    const previousSearchInput = document.querySelector('.search-input-container')
    previousSearchInput?.remove()
+   const previousPagination = document.querySelector('.pagination')
+   previousPagination?.remove()
 }
 
 // Funkcja sprawdzająca, czy tabela jest pusta
@@ -640,7 +665,7 @@ const showModal = data => {
       table.appendChild(row)
    }
    modal.appendChild(table)
-   const closeButton = createButton('×', 'modal-close-btn')
+   const closeButton = createButton('<i class="fa-solid fa-circle-xmark"></i>', 'modal-close-btn')
    closeButton.setAttribute('data-target', 'data-modal-close')
    closeButton.addEventListener('click', () => {
       closeModal(modal)
