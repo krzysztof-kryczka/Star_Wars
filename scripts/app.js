@@ -105,6 +105,7 @@ const handleButtonClick = e => {
 // Funkcja do wyświetlania ograniczonej liczby rekordów
 const displayPage = (currentPage, itemsPerPage) => {
    const items = document.querySelectorAll('tr[data-row-data]')
+   console.log('tr[data-row-data]', items)
    const startIndex = (currentPage - 1) * itemsPerPage
    const endIndex = currentPage * itemsPerPage
    items.forEach((row, index) => {
@@ -448,7 +449,7 @@ const updatePagination = () => {
       currentPageInput.value = currentPage // Zaktualizuj input z numerem strony
       displayPage(currentPage, itemsPerPage)
       // Sprawdź, czy jesteśmy na innej stronie niż ostatnia
-   } else if (currentPage < totalPages && remainingRows === 0) {
+   } else if (currentPage <= totalPages && remainingRows === 0) {
       displayPage(currentPage, itemsPerPage)
    }
 }
@@ -597,6 +598,10 @@ const removeRows = rowsToRemove => {
       tbody.removeChild(row)
       console.log('Usunięty wiersz to: ', row)
    })
+   const removeAllButton = document.querySelector('.remove-all-button')
+   if (!removeAllButton?.classList.contains('is-hidden')) {
+      removeAllButton?.classList.add('is-hidden')
+   }
    updatePagination() // Zaktualizuj liczbę stron jeśli trzeba
    checkEmptyTable() // Sprawdź, czy tabela jest pusta
    updateSearchInput() // Zaktualizuj pole wyszukiwania po usunięciu wiersza
