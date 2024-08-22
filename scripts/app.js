@@ -443,7 +443,13 @@ const updatePagination = () => {
    currentPageInfo.textContent = ` z ${totalPages}`
    const remainingRows = document.querySelectorAll('tr[data-row-data]:not(.is-hidden)').length
    // Sprawdź, czy jesteśmy na ostatniej stronie
+   console.log('currentPage', currentPage)
+   console.log('totalPages', totalPages)
+   console.log('remainingRows', remainingRows)
    if (currentPage > totalPages && remainingRows === 0) {
+      if (totalPages === 0) {
+         return
+      }
       currentPage-- // Przenieś się na poprzednią stronę
       const currentPageInput = document.querySelector('#currentPageInput')
       currentPageInput.value = currentPage // Zaktualizuj input z numerem strony
