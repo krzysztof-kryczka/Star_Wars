@@ -571,7 +571,7 @@ const createActionsCell = row => {
       if (checkedCheckboxes.length > 0) {
          // Jeśli przycisk nie istnieje, stwórz go
          if (!removeAllButton) {
-            createRemoveAllButton()
+            createRemoveSelectAllButton()
          }
       } else {
          // Jeśli checkbox jest odznaczony, usuń przycisk z DOM
@@ -584,12 +584,16 @@ const createActionsCell = row => {
 }
 
 // Funkcja pomocnicza znajduje pierwszy wiersz i dodaje do 6 komórki przycisk 'Remove All'
-function createRemoveAllButton() {
+function createRemoveSelectAllButton() {
    const firstRow = document.querySelector('tbody tr[data-row-data]:not(.is-hidden)')
    const buttonCell = firstRow.querySelector('td:nth-child(6)')
+   const buttonContainer = createElement('div', '', 'buttonsInTD', 'buttons-td')
    const removeAllButton = createButton('Remove all', 'remove-all-button', 'remove-all-button')
    removeAllButton.addEventListener('click', handleRemoveAllButton)
-   buttonCell.appendChild(removeAllButton)
+   const selectAllButton = createButton('Select all', 'remove-all-button', 'remove-all-button')
+   selectAllButton.addEventListener('click', handleSelectAllButton)
+   buttonContainer.append(removeAllButton, selectAllButton)
+   buttonCell.appendChild(buttonContainer)
 }
 
 // Funkcja do usuwania zaznaczonych wierszy
@@ -618,6 +622,22 @@ const removeRows = rowsToRemove => {
    updatePagination() // Zaktualizuj liczbę stron jeśli trzeba
    checkEmptyTable() // Sprawdź, czy tabela jest pusta
    updateSearchInput() // Zaktualizuj pole wyszukiwania po usunięciu wiersza
+}
+
+// Funkcja do zaznaczania wszystkich wierszy
+const handleSelectAllButton = () => {
+   const checkboxes = document.querySelectorAll('.checkbox')
+   const checkedCheckboxes = [...checkboxes].filter(cb => cb.checked)
+   const visibleRows = document.querySelectorAll('tbody tr[data-row-data]:not(.is-hidden)')
+   // console.log('visibleRows', visibleRows)
+   checkboxes.forEach(cb => {
+      const closestRow = cb.closest('tr')
+      // console.log('closestRow', closestRow)
+      if (closestRow && Array.from(visibleRows).includes(closestRow)) {
+         cb.checked = true
+         checkedCheckboxes.push(cb)
+      }
+   })
 }
 
 // Funkcja wyświetlająca komunikat "Brak elementów do wyświetlenia"
