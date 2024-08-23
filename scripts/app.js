@@ -325,12 +325,8 @@ const generateBodyTable = (movieData, category) => {
       const createdCell = document.createElement('td')
       createdCell.textContent = `${formatDate(item.created)}`
       row.appendChild(createdCell)
-      // Button cell
+      // Button cell for Remove All
       const buttonCell = document.createElement('td')
-      const removeAllButton = createButton('Remove all', 'remove-all-button', 'remove-all-button')
-      removeAllButton.classList.add('is-hidden')
-      removeAllButton.addEventListener('click', handleRemoveAllButton)
-      buttonCell.appendChild(removeAllButton)
       row.appendChild(buttonCell)
       // Actions Cell
       const actionsCell = createActionsCell(row)
@@ -362,7 +358,6 @@ const createPageNavigation = () => {
             } else {
                currentPageInput.value = currentPage
             }
-
             break
          case 10:
             currentPageInput.value = ++currentPage
@@ -567,20 +562,34 @@ const createActionsCell = row => {
    // Nasłuchuj zmian w checkboxach
    checkbox.addEventListener('change', () => {
       const checkboxes = document.querySelectorAll('.checkbox')
-      const removeAllButton = document.querySelector('.remove-all-button')
       console.log('checkboxes NodeList', checkboxes)
       // const checkedCheckboxes = Array.from(checkboxes).filter(cb => cb.checked)
       const checkedCheckboxes = [...checkboxes].filter(cb => cb.checked)
       console.log('Array with checkedCheckboxes', checkedCheckboxes)
-      // removeAllButton.style.display = checkedCheckboxes.length > 0 ? 'block' : 'none'
-      // checkedCheckboxes.length > 0
-      //    ? removeAllButton.classList.remove('is-hidden')
-      //    : removeAllButton.classList.add('is-hidden')
-      removeAllButton.classList.toggle('is-hidden', checkedCheckboxes.length === 0)
+      // Sprawdź, czy przycisk już istnieje
+      const removeAllButton = document.querySelector('.remove-all-button')
+      if (checkedCheckboxes.length > 0) {
+         // Jeśli przycisk nie istnieje, stwórz go
+         if (!removeAllButton) {
+            createRemoveAllButton()
+         }
+      } else {
+         // Jeśli checkbox jest odznaczony, usuń przycisk z DOM
+         removeAllButton?.remove()
+      }
    })
    buttonContainer.append(trashButton, infoButton, checkbox) // Dodaj przyciski do kontenera
    createdCell.appendChild(buttonContainer) // Dodaj kontener do komórki
    return createdCell
+}
+
+// Funkcja pomocnicza znajduje pierwszy wiersz i dodaje do 6 komórki przycisk 'Remove All'
+function createRemoveAllButton() {
+   const firstRow = document.querySelector('tbody tr[data-row-data]:not(.is-hidden)')
+   const buttonCell = firstRow.querySelector('td:nth-child(6)')
+   const removeAllButton = createButton('Remove all', 'remove-all-button', 'remove-all-button')
+   removeAllButton.addEventListener('click', handleRemoveAllButton)
+   buttonCell.appendChild(removeAllButton)
 }
 
 // Funkcja do usuwania zaznaczonych wierszy
@@ -605,9 +614,7 @@ const removeRows = rowsToRemove => {
       console.log('Usunięty wiersz to: ', row)
    })
    const removeAllButton = document.querySelector('.remove-all-button')
-   if (!removeAllButton?.classList.contains('is-hidden')) {
-      removeAllButton?.classList.add('is-hidden')
-   }
+   removeAllButton?.remove()
    updatePagination() // Zaktualizuj liczbę stron jeśli trzeba
    checkEmptyTable() // Sprawdź, czy tabela jest pusta
    updateSearchInput() // Zaktualizuj pole wyszukiwania po usunięciu wiersza
