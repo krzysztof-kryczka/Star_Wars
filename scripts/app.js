@@ -23,9 +23,39 @@ const createHeader = () => {
       'character',
       'character',
    )
-   div.appendChild(character)
+   // wybór dla jasnego/ciemnego motywu w postaci przełącznika
+   const divToogle = document.createElement('div')
+   const checkbox = createCheckbox()
+   checkbox.classList.add('checkbox-theme')
+   checkbox.id = 'chk'
+   const label = document.createElement('label')
+   label.classList.add('label')
+   label.htmlFor = 'chk'
+   const moonIcon = document.createElement('i')
+   moonIcon.classList.add('fa-moon', 'fas')
+   const sunIcon = document.createElement('i')
+   sunIcon.classList.add('fa-sun', 'fas')
+   const orb = document.createElement('div')
+   orb.classList.add('orb')
+   label.append(moonIcon, sunIcon, orb)
+   divToogle.append(checkbox, label)
+   div.append(character, divToogle)
    header.appendChild(div)
    document.body.appendChild(header)
+   const chk = document.querySelector('#chk')
+   chk.addEventListener('click', changeTheme)
+   document.documentElement.setAttribute('data-theme', 'light')
+}
+
+const changeTheme = () => {
+   const chk = document.querySelector('#chk')
+   if (chk.checked) {
+      document.documentElement.setAttribute('data-theme', 'dark')
+      chk.checked = true
+   } else {
+      chk.checked = false
+      document.documentElement.setAttribute('data-theme', 'light')
+   }
 }
 
 // To hear something type 'vader' or 'yoda'
