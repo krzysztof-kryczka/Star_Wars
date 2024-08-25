@@ -2,11 +2,28 @@
 @import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;500;600;700;800&amp;family=Oswald:wght@200..700&display=swap');
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css');
 
-:root {
+[data-theme='light'] {
    --brand-primary: #c3a604;
    --brand-secondary: #af0808;
-   --brand-tertiary: #000;
+   --brand-tertiary: #fff;
+   --brand-quaternary: #000;
+   --brand-000: #000;
+   --odd: rgba(243, 243, 243, 0.8);
+   --even: rgba(243, 243, 243, 0.5);
+   --tr-hover: rgb(195 166 4 / 83%);
+   --theme-toggle: #272e34;
+}
+
+[data-theme='dark'] {
+   --brand-primary: #4150ff;
+   --brand-secondary: #2bff00;
+   --brand-tertiary: #afa8a8;
    --brand-quaternary: #fff;
+   --brand-000: #000;
+   --even: rgba(0, 0, 0, 0.8);
+   --odd: rgba(0, 0, 0, 0.5);
+   --tr-hover: rgb(65 80 255 / 69%);
+   --theme-toggle: #272e34;
 }
 
 * {
@@ -46,8 +63,9 @@ body {
 
 .header-container {
    display: flex;
+   justify-content: space-around;
    padding: 1.5625rem; /* 25px */
-   background-color: var(--brand-tertiary);
+   background-color: var(--brand-000);
    color: var(--brand-primary);
 }
 
@@ -57,6 +75,55 @@ body {
 .hero {
    color: var(--brand-secondary);
    font-weight: 700;
+}
+
+.label {
+   cursor: pointer;
+   background-color: var(--theme-toggle);
+   border-radius: 3.125rem; /* 50px */
+   justify-content: space-between;
+   align-items: center;
+   width: 2.1875rem; /* 35px */
+   height: 1rem; /* 16px */
+   padding: 0.1875rem; /* 3px */
+   display: flex;
+   position: relative;
+   transform: scale(1.8);
+}
+
+.label .orb {
+   background-color: var(--brand-tertiary);
+   border-radius: 50%;
+   width: 1rem; /* 16px */
+   height: 1rem; /* 16px */
+   transition-property: transform, background-color;
+   transition-duration: 0.2s;
+   transition-timing-function: linear;
+   position: absolute;
+   left: 0;
+   transform: translate(0);
+}
+
+.checkbox-theme {
+   opacity: 0;
+   position: absolute;
+}
+
+.checkbox-theme:checked + .label .orb {
+   transform: translateX(19px);
+}
+
+.fa-moon {
+   color: #d7dcc2;
+   font-size: 0.8125rem; /* 13px */
+}
+
+.fa-sun {
+   color: #f9ff86;
+   font-size: 0.6875rem; /* 11px */
+}
+
+.sw-theme {
 }
 
 .button-container {
@@ -143,14 +210,23 @@ table {
 
 thead {
    background-color: var(--brand-primary);
+
+   font-family: Oswald, sans-serif;
 }
 
 table tbody tr:nth-child(even) td {
-   background-color: rgba(243, 243, 243, 0.5);
+   background-color: var(--even);
+   color: var(--brand-tertiary);
 }
 
 table tbody tr:nth-child(odd) td {
-   background-color: rgba(243, 243, 243, 0.8);
+   background-color: var(--odd);
+   color: var(--brand-quaternary);
+}
+
+table tr:hover {
+   background-color: var(--tr-hover);
+   border-radius: 0.5rem;
 }
 
 table td,
@@ -170,13 +246,14 @@ th {
 .remove-button,
 .info-button,
 .remove-all-button,
+.select-all-button,
 .modal-close-btn,
 .prevButton,
 .nextButton {
    padding: 0.3125rem 0.625rem; /* 5px 10px */
    width: 2.5rem; /* 40px */
    height: 2.5rem; /* 40px */
-   background-color: var(--brand-tertiary);
+   background-color: var(--brand-000);
    border: 1px solid var(--brand-primary);
    border-radius: 0.5rem; /* 8px */
    box-shadow: 5px 4px 4px rgba(42, 41, 41, 0.365);
@@ -186,7 +263,8 @@ th {
    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.remove-all-button {
+.remove-all-button,
+.select-all-button {
    padding: 0.625rem 1.25rem; /* 10px 20px */
    font-weight: 700;
    width: 9.375rem; /* 150px */
@@ -196,6 +274,7 @@ th {
 .remove-button:hover,
 .info-button:hover,
 .remove-all-button:hover,
+.select-all-button:hover,
 .modal-close-btn:hover,
 .prevButton:hover,
 .nextButton:hover {
@@ -206,8 +285,13 @@ th {
    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-checkbox {
+.checkbox {
    width: 1.25rem; /* 20px */
+   height: 1.25rem; /* 20px */
+}
+
+input[type='checkbox'] {
+   accent-color: var(--brand-secondary);
 }
 
 .pagination {
@@ -246,7 +330,7 @@ footer > p {
    padding: 1.5625rem; /* 25px */
    color: var(--brand-primary);
    font-size: 1rem; /* 16px */
-   background-color: var(--brand-tertiary);
+   background-color: var(--brand-000);
 }
 
 .modal {
@@ -276,7 +360,7 @@ footer > p {
 .no-row-message {
    color: var(--brand-secondary);
    font-weight: 700;
-   background-color: rgba(243, 243, 243, 0.8);
+   background-color: var(--odd);
 }
 
 @media screen and (min-width: 320px) and (max-width: 767px) {
