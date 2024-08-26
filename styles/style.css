@@ -341,7 +341,7 @@ footer > p {
    padding: 1.25rem; /* 20px */
    border-radius: 0.625rem; /* 10px */
    background-color: rgba(0, 0, 0, 0.8);
-   color: var(--brand-quaternary);
+   color: var(--brand-tertiary);
    overflow: auto;
    height: 70vh;
 }
