@@ -113,7 +113,7 @@ const handleButtonClick = e => {
    const clickedButton = e.target
    const isActive = clickedButton.classList.contains('is-active')
    if (isActive) {
-      clickedButton.classList.remove('is-active')
+      // clickedButton.classList.remove('is-active')
    } else {
       // Usuń klasę "is-active" ze wszystkich przycisków
       const allButtons = document.querySelectorAll('.sw-button')
@@ -135,7 +135,6 @@ const handleButtonClick = e => {
 // Funkcja do wyświetlania ograniczonej liczby rekordów
 const displayPage = (currentPage, itemsPerPage) => {
    const items = document.querySelectorAll('tr[data-row-data]')
-   console.log('tr[data-row-data]', items)
    const startIndex = (currentPage - 1) * itemsPerPage
    const endIndex = currentPage * itemsPerPage
    items.forEach((row, index) => {
@@ -152,7 +151,6 @@ const createSearchInput = category => {
    const searchInputContainer = document.createElement('div')
    searchInputContainer.classList.add('search-input-container')
    const visibleRows = document.querySelectorAll('tbody tr[data-row-data]')
-   console.log('visibleRows', visibleRows)
    const searchInputId = createInput('number', 'searchInputId', 'search-input-id', 'index', '1', '1000')
    const labelElementId = document.createElement('label')
    labelElementId.textContent = 'Search by index:'
@@ -468,9 +466,6 @@ const updatePagination = () => {
    currentPageInfo.textContent = ` z ${totalPages}`
    const remainingRows = document.querySelectorAll('tr[data-row-data]:not(.is-hidden)').length
    // Sprawdź, czy jesteśmy na ostatniej stronie
-   console.log('currentPage', currentPage)
-   console.log('totalPages', totalPages)
-   console.log('remainingRows', remainingRows)
    if (currentPage > totalPages && remainingRows === 0) {
       if (totalPages === 0) {
          return
@@ -592,20 +587,20 @@ const createActionsCell = row => {
    // Nasłuchuj zmian w checkboxach
    checkbox.addEventListener('change', () => {
       const checkboxes = document.querySelectorAll('.checkbox')
-      console.log('checkboxes NodeList', checkboxes)
       // const checkedCheckboxes = Array.from(checkboxes).filter(cb => cb.checked)
       const checkedCheckboxes = [...checkboxes].filter(cb => cb.checked)
-      console.log('Array with checkedCheckboxes', checkedCheckboxes)
       // Sprawdź, czy przycisk już istnieje
       const removeAllButton = document.querySelector('.remove-all-button')
+      const selectAllButton = document.querySelector('.select-all-button')
       if (checkedCheckboxes.length > 0) {
          // Jeśli przycisk nie istnieje, stwórz go
          if (!removeAllButton) {
             createRemoveSelectAllButton()
          }
       } else {
-         // Jeśli checkbox jest odznaczony, usuń przycisk z DOM
+         // Jeśli checkbox jest odznaczony, usuń przyciski z DOM
          removeAllButton?.remove()
+         selectAllButton?.remove()
       }
    })
    buttonContainer.append(trashButton, infoButton, checkbox) // Dodaj przyciski do kontenera
@@ -618,9 +613,9 @@ function createRemoveSelectAllButton() {
    const firstRow = document.querySelector('tbody tr[data-row-data]:not(.is-hidden)')
    const buttonCell = firstRow.querySelector('td:nth-child(6)')
    const buttonContainer = createElement('div', '', 'buttonsInTD', 'buttons-td')
-   const removeAllButton = createButton('Remove all', 'remove-all-button', 'remove-all-button')
+   const removeAllButton = createButton('Remove all', 'remove-all-button')
    removeAllButton.addEventListener('click', handleRemoveAllButton)
-   const selectAllButton = createButton('Select all', 'remove-all-button', 'remove-all-button')
+   const selectAllButton = createButton('Select all', 'select-all-button')
    selectAllButton.addEventListener('click', handleSelectAllButton)
    buttonContainer.append(removeAllButton, selectAllButton)
    buttonCell.appendChild(buttonContainer)
@@ -645,7 +640,6 @@ const removeRows = rowsToRemove => {
    const tbody = document.querySelector('tbody')
    rowsToRemove.forEach(row => {
       tbody.removeChild(row)
-      console.log('Usunięty wiersz to: ', row)
    })
    const removeAllButton = document.querySelector('.remove-all-button')
    removeAllButton?.remove()
@@ -659,10 +653,8 @@ const handleSelectAllButton = () => {
    const checkboxes = document.querySelectorAll('.checkbox')
    const checkedCheckboxes = [...checkboxes].filter(cb => cb.checked)
    const visibleRows = document.querySelectorAll('tbody tr[data-row-data]:not(.is-hidden)')
-   // console.log('visibleRows', visibleRows)
    checkboxes.forEach(cb => {
       const closestRow = cb.closest('tr')
-      // console.log('closestRow', closestRow)
       if (closestRow && Array.from(visibleRows).includes(closestRow)) {
          cb.checked = true
          checkedCheckboxes.push(cb)
@@ -722,10 +714,7 @@ const showModal = data => {
       const valueCell = document.createElement('td')
       keyCell.textContent = key
       const text = data[key]
-      console.log(`text: ${text}`)
-      console.log('typeof: ', typeof text)
       const urlArray = text.toString().split(',').join(',\n')
-      console.log(`urlArray: ${urlArray}`)
       valueCell.textContent = urlArray
       // valueCell.textContent = data[key]
       row.appendChild(keyCell)
@@ -740,7 +729,6 @@ const showModal = data => {
    })
    modal.appendChild(closeButton)
    document.body.appendChild(modal)
-   console.log(`Dane z wiersza: ${data}`)
 }
 
 // Funkcja do zamykania okna modalnego
