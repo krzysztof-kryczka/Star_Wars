@@ -94,60 +94,52 @@ const playAudio = audio => {
    typedWord = ''
 }
 
-// Tworzenie sekcji głównej (section: main)
+// Function to create the main section
 const createMain = () => {
    const main = document.createElement('main')
    document.body.appendChild(main)
 }
 
-// Tworzenie przycisków na podstawie kluczy obiektu rowData
+// Function to create buttons based on the keys of the rowData object
 const createButtons = () => {
+   // Get the keys from the rowData object
    const keys = Object.keys(rowData)
-   const buttonContainer = document.createElement('div') // Dodaj kontener dla przycisków
-   buttonContainer.classList.add('button-container') // Dodaj klasę do stylizacji wszystkich przycisków
-   for (const key of keys) {
-      const button = document.createElement('button')
-      button.textContent = key.toUpperCase()
-      button.classList.add('sw-button') // Dodaj klasę do stylizacji pojedynczego przycisku
-      button.id = `button-${key}`
-      button.setAttribute('data-category', key)
-      buttonContainer.appendChild(button) // Dodaj przyciski do kontenera
-      button.addEventListener('click', handleButtonClick)
-   }
    const main = document.querySelector('main')
-   main.appendChild(buttonContainer) // Dodaj kontener do sekcji głównej
+   const buttonContainer = document.createElement('div')
+   buttonContainer.classList.add('button-container')
+   // Document fragment for better performance
+   // https://developer.mozilla.org/en-US/docs/Web/API/Document/createDocumentFragment
+   const fragment = document.createDocumentFragment()
+   // Iterate over each key to create a button
+   keys.forEach(key => {
+      const button = createButton(`${key.toUpperCase()}`, 'sw-button')
+      button.setAttribute('data-category', key)
+      fragment.appendChild(button)
+      button.addEventListener('click', handleButtonClick)
+   })
+   buttonContainer.appendChild(fragment)
+   main.appendChild(buttonContainer)
 }
 
-// Funkcja obsługująca kliknięcie przycisku
+// Function to handle button click
 const handleButtonClick = e => {
    removeLogo()
-   // Usuń poprzednią tabelkę i elementy paginacji (jeśli istnieją)
-   const previousTable = document.querySelector('table')
-   const previousPagination = document.querySelector('.pagination')
-   const previousSearchInput = document.querySelector('.search-input-container')
-   if (previousTable) {
-      previousTable.remove()
-      previousPagination?.remove()
-      previousSearchInput?.remove()
-   }
-   // Pobierz nazwę kategorii z przycisku
-   const category = e.target.getAttribute('data-category')
-   // Pobierz dane na podstawie nazwy przycisku
+   const main = document.querySelector('main')
+   // Get the clicked button and category name from the button
    const clickedButton = e.target
-   const isActive = clickedButton.classList.contains('is-active')
-   if (isActive) {
-      // clickedButton.classList.remove('is-active')
-   } else {
-      // Usuń klasę "is-active" ze wszystkich przycisków
-      const allButtons = document.querySelectorAll('.sw-button')
-      allButtons.forEach(button => button.classList.remove('is-active'))
-      // Dodaj klasę "is-active" tylko do klikniętego przycisku
-      clickedButton.classList.add('is-active')
-   }
-
+   const category = e.target.getAttribute('data-category')
+   // Get data for the selected category
    const movieData = rowData[category]
    const table = createTable(movieData, category)
-   const main = document.querySelector('main')
+
+   // Remove previous table, pagination elements and filters (if they exist)
+   document.querySelector('table')?.remove()
+   document.querySelector('.pagination')?.remove()
+   document.querySelector('.search-input-container')?.remove()
+   // Remove "is-active" class from all buttons and add it to the clicked button
+   document.querySelectorAll('.sw-button').forEach(button => button.classList.remove('is-active'))
+   clickedButton.classList.add('is-active')
+
    main.appendChild(table)
    createSearchInput(category)
    displayPage(1, 10)
