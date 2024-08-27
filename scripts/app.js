@@ -59,17 +59,36 @@ const changeTheme = () => {
 }
 
 // To hear something type 'vader' or 'yoda'
-let typedWord = null
+// Initialize variables to store the typed word and the current audio being played
+let typedWord = ''
+let currentAudio = null
 document.addEventListener('keydown', event => {
+   // Create new Audio objects for the Vader and Yoda sounds
    const vaderAudio = new Audio('./assets/audio/darth_vader.mp3')
    const yodaAudio = new Audio('./assets/audio/Yoda_Yoda.mp3')
+   // Append the pressed key to the typedWord variable
    typedWord = `${typedWord}` + event.key.toLowerCase()
-   const playAudio = typedWord.includes('vader') ? vaderAudio : typedWord.includes('yoda') ? yodaAudio : null
-   if (playAudio) {
-      playAudio.play()
-      typedWord = null // Resetuj zmienną po odtworzeniu dźwięku
+   // Check if the typed word includes 'vader' or 'yoda' and play the corresponding audio
+   if (typedWord.includes('vader')) {
+      playAudio(vaderAudio)
+   } else if (typedWord.includes('yoda')) {
+      playAudio(yodaAudio)
    }
 })
+
+// Function to play the audio
+const playAudio = audio => {
+   // Pause and reset the current audio if it is playing
+   if (currentAudio) {
+      currentAudio.pause()
+      currentAudio.currentTime = 0
+   }
+   // Play the new audio and set it as the current audio
+   audio.play()
+   currentAudio = audio
+   // Reset the typedWord variable after playing the sound
+   typedWord = ''
+}
 
 // Tworzenie sekcji głównej (section: main)
 const createMain = () => {
