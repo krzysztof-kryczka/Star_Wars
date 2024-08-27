@@ -1,6 +1,6 @@
 import { rowData } from '../assets/data/data.js'
 
-// Funkcja inicjalizująca stronę
+// Function to initialize the page
 const initializePage = () => {
    createHeader()
    createMain()
@@ -9,53 +9,57 @@ const initializePage = () => {
    createFooter()
 }
 
+// Variables to manage pagination
 let currentPage = 1
 let itemsPerPage = 10
 let totalPages = 1
 
-// Tworzenie nagłówka (section: header)
+// Function to create the header section
 const createHeader = () => {
    const header = document.createElement('header')
-   const div = createElement('div', '', 'header-container', 'header-container')
+   const div = document.createElement('div')
    const character = createElement(
       'p',
       'Write <span class="hero">VADER</span> or <span class="hero">YODA</span>. You should be amazed!!!',
       'character',
       'character',
    )
-   // wybór dla jasnego/ciemnego motywu w postaci przełącznika
-   const divToogle = document.createElement('div')
+   const divToggle = document.createElement('div')
    const checkbox = createCheckbox()
-   checkbox.classList.add('checkbox-theme')
-   checkbox.id = 'chk'
    const label = document.createElement('label')
-   label.classList.add('label')
-   label.htmlFor = 'chk'
    const moonIcon = document.createElement('i')
-   moonIcon.classList.add('fa-moon', 'fas')
    const sunIcon = document.createElement('i')
-   sunIcon.classList.add('fa-sun', 'fas')
    const orb = document.createElement('div')
+
+   div.classList.add('header-container')
+   checkbox.classList.add('checkbox-theme')
+   label.classList.add('label')
+   moonIcon.classList.add('fa-moon', 'fas')
+   sunIcon.classList.add('fa-sun', 'fas')
    orb.classList.add('orb')
+
+   // Set the ID and htmlFor attribute for the checkbox and label
+   checkbox.id = 'themeSwitch'
+   label.htmlFor = 'themeSwitch'
+
    label.append(moonIcon, sunIcon, orb)
-   divToogle.append(checkbox, label)
-   div.append(character, divToogle)
+   divToggle.append(checkbox, label)
+   div.append(character, divToggle)
    header.appendChild(div)
    document.body.appendChild(header)
-   const chk = document.querySelector('#chk')
-   chk.addEventListener('click', changeTheme)
+
+   // Add an event listener to the checkbox to change the theme
+   checkbox.addEventListener('click', changeTheme)
+   // Set the initial theme to light
    document.documentElement.setAttribute('data-theme', 'light')
 }
 
+// Function to change the theme
 const changeTheme = () => {
-   const chk = document.querySelector('#chk')
-   if (chk.checked) {
-      document.documentElement.setAttribute('data-theme', 'dark')
-      chk.checked = true
-   } else {
-      chk.checked = false
-      document.documentElement.setAttribute('data-theme', 'light')
-   }
+   const themeSwitch = document.querySelector('#themeSwitch')
+   // Determine the theme based on the checkbox state
+   const theme = themeSwitch.checked ? 'dark' : 'light'
+   document.documentElement.setAttribute('data-theme', theme)
 }
 
 // To hear something type 'vader' or 'yoda'
