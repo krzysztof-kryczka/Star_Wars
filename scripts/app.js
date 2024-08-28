@@ -279,6 +279,7 @@ const createTable = (movieData, category) => {
 const getHeadersForCategory = (movieData, category) => {
    const headersCreatedActions = ['CREATED', 'ACTIONS']
    const keys = Object.keys(movieData[0]).slice(0, 3) // First three keys from movieData[0]
+   const formattedKeys = keys.map(key => key.split('_').join(' '))
    const keyMapping = {
       // ['ID', 'NAME', 'MODEL', 'MANUFACTURER', 'CREATED', 'ACTIONS']
       vehicles: ['ID', ...keys, ...headersCreatedActions],
@@ -287,16 +288,16 @@ const getHeadersForCategory = (movieData, category) => {
       // ['ID', 'NAME', 'CLASSIFICATION', 'DESIGNATION', 'CREATED', 'ACTIONS']
       species: ['ID', ...keys, ...headersCreatedActions],
       // ['ID', 'NAME', 'ROTATION PERIOD', 'ORBITAL PERIOD', 'CREATED', 'ACTIONS']
-      planets: ['ID', keys[0], keys[1].split('_').join(' '), keys[2].split('_').join(' '), ...headersCreatedActions],
+      planets: ['ID', keys[0], formattedKeys[1], formattedKeys[2], ...headersCreatedActions],
       // ['ID', 'NAME', 'HEIGHT', 'MASS', 'CREATED', 'ACTIONS']
       people: ['ID', ...keys, ...headersCreatedActions],
       // ['ID', 'TITLE', 'EPISODE ID', 'OPENING CRAWL', 'CREATED', 'ACTIONS']
-      films: ['ID', keys[0], keys[1].split('_').join(' '), keys[2].split('_').join(' '), ...headersCreatedActions],
+      films: ['ID', keys[0], formattedKeys[1], formattedKeys[2], ...headersCreatedActions],
    }
    return keyMapping[category] || []
 }
 
-// Funkcja generująca tbody na podstawie obiektu movieData
+// Function to generate tbody based on the movieData object
 const generateBodyTable = (movieData, category) => {
    const tbody = document.createElement('tbody')
    tbody.innerHTML = ''
@@ -307,24 +308,10 @@ const generateBodyTable = (movieData, category) => {
    movieData.forEach((item, index) => {
       const row = document.createElement('tr')
       row.appendChild(createCell(`${index + 1}`))
-      // Wybierz dowolne 3 klucze (np. 'name', 'birth_year', 'gender')
-      // Wybierz odpowiednie klucze w zależności od kategorii
-      const categoryToKeysMap = {
-         // 'NAME', 'MODEL', 'MANUFACTURER'
-         vehicles: [Object.keys(item)[0], Object.keys(item)[1], Object.keys(item)[2]],
-         // 'NAME', 'MODEL', 'MANUFACTURER'
-         starships: [Object.keys(item)[0], Object.keys(item)[1], Object.keys(item)[2]],
-         // 'NAME', 'CLASSIFICATION', 'DESIGNATION'
-         species: [Object.keys(item)[0], Object.keys(item)[1], Object.keys(item)[2]],
-         // 'NAME', 'ROTATION_PERIOD', 'ORBITAL_PERIOD'
-         planets: [Object.keys(item)[0], Object.keys(item)[1], Object.keys(item)[2]],
-         // 'NAME', 'HEIGHT', 'MASS'
-         people: [Object.keys(item)[0], Object.keys(item)[1], Object.keys(item)[2]],
-         // 'TITLE', 'EPISODE_ID', 'OPENING_CRAWL'
-         films: [Object.keys(item)[0], Object.keys(item)[1], Object.keys(item)[2]],
-      }
-      const keysToShow = categoryToKeysMap[category] || []
-      keysToShow.forEach(key => row.appendChild(createBasicStarWarsCell(item[key])))
+
+      // Get keys for the given category
+      const keys = getHeadersForCategory(movieData, category).slice(1, 4) // Skip 'ID' and 'CREATED', 'ACTIONS'
+      keys.forEach(key => row.appendChild(createBasicStarWarsCell(item[key.split(' ').join('_')])))
 
       // Created Date cell
       row.appendChild(createCell(`${formatDate(item.created)}`))
