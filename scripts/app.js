@@ -214,16 +214,14 @@ const createSearchInput = category => {
 // Funkcja obsługująca zdarzenie wprowadzania id lub tekstu w inpucie
 const handleSearchInput = (e, cellIndex, useIncludes) => {
    const inputValue = e.target.value.toLowerCase()
-   let foundRow = false
    const tableRows = document.querySelectorAll('tbody tr[data-row-data]')
    const noRowMessage = document.querySelector('.no-row-message')
-   if (noRowMessage) {
-      noRowMessage.remove()
-   }
+   let foundRow = false
+   noRowMessage?.remove()
    tableRows.forEach(row => {
       const cell = row.querySelector(`${cellIndex}`)
       if (cell) {
-         const cellValue = cell.textContent.toLowerCase()
+         const cellValue = cell?.textContent.toLowerCase()
          if (
             // prettier-ignore
             useIncludes && cellValue.includes(inputValue) ||
@@ -242,7 +240,7 @@ const handleSearchInput = (e, cellIndex, useIncludes) => {
       newNoRowMessage.classList.add('no-row-message')
       const noRowCell = document.createElement('td')
       noRowCell.textContent = 'Nie znaleziono pasującego wiersza.'
-      noRowCell.colSpan = 7
+      noRowCell.colSpan = tableRows[0].children.length
       newNoRowMessage.appendChild(noRowCell)
       document.querySelector('table').appendChild(newNoRowMessage)
    }
@@ -254,24 +252,22 @@ const handleSearchInput = (e, cellIndex, useIncludes) => {
    }
 }
 
-// Funkcja tworząca tabelę
+// Function that creates a table
 const createTable = (movieData, category) => {
    const table = document.createElement('table')
    const thead = document.createElement('thead')
-   // Nagłówki zależne od kategorii przycisku
+   // Get headers based on category
    const headers = getHeadersForCategory(movieData, category)
    const headerRow = document.createElement('tr')
-   for (const header of headers) {
+   headers.forEach(header => {
       const th = document.createElement('th')
       th.textContent = `${header.toUpperCase()}`
       headerRow.appendChild(th)
-   }
-   // Dodatkowy nagłówek dla przycisku Remove All
+   })
+   // Additional header for 'Remove All' and 'Select All' buttons
    const additionalHeader = document.createElement('th')
    additionalHeader.textContent = ''
-   // Pobierz ostatni nagłówek
    const lastHeader = headerRow.lastElementChild
-   // Wstaw nowy nagłówek przed ostatnim nagłówkiem
    headerRow.insertBefore(additionalHeader, lastHeader)
    thead.appendChild(headerRow)
    const tbody = generateBodyTable(movieData, category)
@@ -279,52 +275,23 @@ const createTable = (movieData, category) => {
    return table
 }
 
-// Funkcja zwracająca nagłówki na podstawie kategorii
+// Function to generate a list of headers based on the category
 const getHeadersForCategory = (movieData, category) => {
    const headersCreatedActions = ['CREATED', 'ACTIONS']
+   const keys = Object.keys(movieData[0]).slice(0, 3) // First three keys from movieData[0]
    const keyMapping = {
-      vehicles: [
-         'ID',
-         Object.keys(movieData[0])[0], // NAME
-         Object.keys(movieData[0])[1], // MODEL
-         Object.keys(movieData[0])[2], // MANUFACTURER
-         ...headersCreatedActions,
-      ],
-      starships: [
-         'ID',
-         Object.keys(movieData[0])[0], // NAME
-         Object.keys(movieData[0])[1], // MODEL
-         Object.keys(movieData[0])[2], // MANUFACTURER
-         ...headersCreatedActions,
-      ],
-      species: [
-         'ID',
-         Object.keys(movieData[0])[0], // NAME
-         Object.keys(movieData[0])[1], // CLASSIFICATION
-         Object.keys(movieData[0])[2], // DESIGNATION
-         ...headersCreatedActions,
-      ],
-      planets: [
-         'ID',
-         Object.keys(movieData[0])[0], // NAME
-         Object.keys(movieData[0])[1].split('_').join(' '), // ROTATION PERIOD
-         Object.keys(movieData[0])[2].split('_').join(' '), // 'ORBITAL PERIOD'
-         ...headersCreatedActions,
-      ],
-      people: [
-         'ID',
-         Object.keys(movieData[0])[0], // NAME
-         Object.keys(movieData[0])[1], // HEIGHT
-         Object.keys(movieData[0])[2], // MASS
-         ...headersCreatedActions,
-      ],
-      films: [
-         'ID',
-         Object.keys(movieData[0])[0], // TITLE
-         Object.keys(movieData[0])[1].split('_').join(' '), // 'EPISODE ID
-         Object.keys(movieData[0])[2].split('_').join(' '), // 'OPENING CRAWL'
-         ...headersCreatedActions,
-      ],
+      // ['ID', 'NAME', 'MODEL', 'MANUFACTURER', 'CREATED', 'ACTIONS']
+      vehicles: ['ID', ...keys, ...headersCreatedActions],
+      // ['ID', 'NAME', 'MODEL', 'MANUFACTURER', 'CREATED', 'ACTIONS']
+      starships: ['ID', ...keys, ...headersCreatedActions],
+      // ['ID', 'NAME', 'CLASSIFICATION', 'DESIGNATION', 'CREATED', 'ACTIONS']
+      species: ['ID', ...keys, ...headersCreatedActions],
+      // ['ID', 'NAME', 'ROTATION PERIOD', 'ORBITAL PERIOD', 'CREATED', 'ACTIONS']
+      planets: ['ID', keys[0], keys[1].split('_').join(' '), keys[2].split('_').join(' '), ...headersCreatedActions],
+      // ['ID', 'NAME', 'HEIGHT', 'MASS', 'CREATED', 'ACTIONS']
+      people: ['ID', ...keys, ...headersCreatedActions],
+      // ['ID', 'TITLE', 'EPISODE ID', 'OPENING CRAWL', 'CREATED', 'ACTIONS']
+      films: ['ID', keys[0], keys[1].split('_').join(' '), keys[2].split('_').join(' '), ...headersCreatedActions],
    }
    return keyMapping[category] || []
 }
@@ -339,9 +306,7 @@ const generateBodyTable = (movieData, category) => {
    }
    movieData.forEach((item, index) => {
       const row = document.createElement('tr')
-      const idCell = document.createElement('td')
-      idCell.textContent = `${index + 1}`
-      row.appendChild(idCell)
+      row.appendChild(createCell(`${index + 1}`))
       // Wybierz dowolne 3 klucze (np. 'name', 'birth_year', 'gender')
       // Wybierz odpowiednie klucze w zależności od kategorii
       const categoryToKeysMap = {
@@ -359,22 +324,16 @@ const generateBodyTable = (movieData, category) => {
          films: [Object.keys(item)[0], Object.keys(item)[1], Object.keys(item)[2]],
       }
       const keysToShow = categoryToKeysMap[category] || []
-      for (const keyToShow of keysToShow) {
-         const cell = createBasicStarWarsCell(item[keyToShow])
-         row.appendChild(cell)
-      }
-      // Pozostałe komórki (CREATED i ACTIONS)
-      // Created cell
-      const createdCell = document.createElement('td')
-      createdCell.textContent = `${formatDate(item.created)}`
-      row.appendChild(createdCell)
-      // Button cell for Remove All
-      const buttonCell = document.createElement('td')
-      row.appendChild(buttonCell)
+      keysToShow.forEach(key => row.appendChild(createBasicStarWarsCell(item[key])))
+
+      // Created Date cell
+      row.appendChild(createCell(`${formatDate(item.created)}`))
+      // Button cell for Remove All , Select All
+      row.appendChild(createCell(''))
       // Actions Cell
-      const actionsCell = createActionsCell(row)
-      row.dataset.rowData = JSON.stringify(item) // Przypisz dane wiersza
-      row.appendChild(actionsCell)
+      row.appendChild(createActionsCell(row))
+      // Assign the JSON string to the rowData property of the dataset object of the row element
+      row.dataset.rowData = JSON.stringify(item)
       tbody.appendChild(row)
    })
    return tbody
@@ -562,6 +521,14 @@ const createInput = (type, id, className, placeholder = 1, min = 1, max = 1) => 
    return input
 }
 
+// Function to create a div element
+const createContainer = (className, text = '') => {
+   const div = document.createElement('div')
+   div.textContent = `${text}`
+   div.classList.add(className)
+   return div
+}
+
 // Funkcja do tworzenia elementów takich jak span, p
 const createElement = (tagName, text, id, className) => {
    const element = document.createElement(tagName)
@@ -571,78 +538,93 @@ const createElement = (tagName, text, id, className) => {
    return element
 }
 
-// Funkcja do tworzenia komórek tabeli z API SW
+// Function to create table cells with SW API
 const createBasicStarWarsCell = text => {
    const cell = document.createElement('td')
-   // Usuń znaki specjalne \r i \n z tekstu w cell.textContent Category FILMS
+   // Remove special characters \r and \n from text in cell.textContent Category FILMS
    cell.textContent = `${text}`
    const cleanedText = cell.textContent.split(/\\r|\\n/).join(' ')
    cell.textContent = cleanedText
    return cell
 }
 
-// Funkcja do tworzenia komórki tabeli Actions
+// Function to create a table cell element
+const createCell = row => {
+   const cell = document.createElement('td')
+   cell.textContent = `${row}`
+   return cell
+}
+
+// Function to create a cell with action buttons and a checkbox
 const createActionsCell = row => {
    const createdCell = document.createElement('td')
-   const buttonContainer = createElement('div', '', 'buttonsInTD', 'buttons-td')
+   const buttonContainer = createContainer('buttons-td')
    const trashButton = createButton('<i class="fa-solid fa-trash-can"></i>', 'remove-button')
-   trashButton.addEventListener('click', () => {
-      removeRows([row])
-   })
    const infoButton = createButton('<i class="fa-solid fa-plus"></i>', 'info-button')
-   infoButton.setAttribute('data-target', 'data-modal-open')
-   infoButton.addEventListener('click', () => {
-      const { rowData } = row.dataset
-      const parsedData = JSON.parse(rowData)
-      showModal(parsedData)
-   })
-
    const checkbox = createCheckbox()
+
+   infoButton.setAttribute('data-target', 'data-modal-open')
    checkbox.classList.add('checkbox')
-   // Nasłuchuj zmian w checkboxach
-   checkbox.addEventListener('change', () => {
-      const checkboxes = document.querySelectorAll('.checkbox')
-      // const checkedCheckboxes = Array.from(checkboxes).filter(cb => cb.checked)
-      const checkedCheckboxes = [...checkboxes].filter(cb => cb.checked)
-      // Sprawdź, czy przycisk już istnieje
-      const removeAllButton = document.querySelector('.remove-all-button')
-      const selectAllButton = document.querySelector('.select-all-button')
-      if (checkedCheckboxes.length > 0) {
-         // Jeśli przycisk nie istnieje, stwórz go
-         if (!removeAllButton) {
-            createRemoveSelectAllButton()
-         }
-      } else {
-         // Jeśli checkbox jest odznaczony, usuń przyciski z DOM
-         removeAllButton?.remove()
-         selectAllButton?.remove()
-      }
-   })
-   buttonContainer.append(trashButton, infoButton, checkbox) // Dodaj przyciski do kontenera
-   createdCell.appendChild(buttonContainer) // Dodaj kontener do komórki
+
+   // Add an event listener to the trash button to remove the row when clicked
+   trashButton.addEventListener('click', () => removeRows([row]))
+   // Add an event listener to the info button to show a modal with row data when clicked
+   infoButton.addEventListener('click', () => handleInfoButtonClick(row))
+   // Add an event listener to the checkbox to handle changes
+   checkbox.addEventListener('change', handleCheckboxChange)
+
+   buttonContainer.append(trashButton, infoButton, checkbox)
+   createdCell.appendChild(buttonContainer)
    return createdCell
 }
 
-// Funkcja pomocnicza znajduje pierwszy wiersz i dodaje do 6 komórki przycisk 'Remove All'
-function createRemoveSelectAllButton() {
+// Function to handle the checkbox change event
+const handleCheckboxChange = () => {
+   const checkboxes = document.querySelectorAll('.checkbox')
+   // Filter the checkboxes to find the ones that are checked
+   const checkedCheckboxes = [...checkboxes].filter(cb => cb.checked)
+   const removeAllButton = document.querySelector('.remove-all-button')
+   const selectAllButton = document.querySelector('.select-all-button')
+   // Check if any checkboxes are checked
+   if (checkedCheckboxes.length > 0) {
+      // If there are checked checkboxes and the 'Remove All' button doesn't exist, create the buttons
+      if (!removeAllButton) {
+         createRemoveSelectAllButton()
+      }
+   } else if (checkedCheckboxes.length === 0) {
+      // If no checkboxes are checked, remove the 'Remove All' and 'Select All' buttons if they exist
+      removeAllButton?.remove()
+      selectAllButton?.remove()
+   }
+}
+
+// Function to handle the info button click event
+const handleInfoButtonClick = row => {
+   const { rowData } = row.dataset
+   const parsedData = JSON.parse(rowData)
+   showModal(parsedData)
+}
+
+// Function creates and adds "Remove all" and "Select all" buttons to the first visible row in the table
+const createRemoveSelectAllButton = () => {
    const firstRow = document.querySelector('tbody tr[data-row-data]:not(.is-hidden)')
    const buttonCell = firstRow.querySelector('td:nth-child(6)')
-   const buttonContainer = createElement('div', '', 'buttonsInTD', 'buttons-td')
+   const buttonContainer = createContainer('buttons-td')
    const removeAllButton = createButton('Remove all', 'remove-all-button')
-   removeAllButton.addEventListener('click', handleRemoveAllButton)
    const selectAllButton = createButton('Select all', 'select-all-button')
+   removeAllButton.addEventListener('click', handleRemoveAllButton)
    selectAllButton.addEventListener('click', handleSelectAllButton)
    buttonContainer.append(removeAllButton, selectAllButton)
    buttonCell.appendChild(buttonContainer)
 }
 
-// Funkcja do usuwania zaznaczonych wierszy
+// Function to remove selected rows
 const handleRemoveAllButton = () => {
    const checkboxes = document.querySelectorAll('.checkbox')
    const selectedRows = []
    checkboxes.forEach(checkbox => {
       if (checkbox.checked) {
-         // Dla każdego zaznaczonego checkboxa znajdujemy jego najbliższego rodzica o tagu <tr>
+         // For each checked checkbox, find its closest parent <tr> tag
          const row = checkbox.closest('tr')
          selectedRows.push(row)
       }
@@ -650,20 +632,17 @@ const handleRemoveAllButton = () => {
    removeRows(selectedRows)
 }
 
-// Główna funkcja do usuwania wierszy
+// Main function to delete rows
 const removeRows = rowsToRemove => {
    const tbody = document.querySelector('tbody')
-   rowsToRemove.forEach(row => {
-      tbody.removeChild(row)
-   })
-   const removeAllButton = document.querySelector('.remove-all-button')
-   removeAllButton?.remove()
-   updatePagination() // Zaktualizuj liczbę stron jeśli trzeba
-   checkEmptyTable() // Sprawdź, czy tabela jest pusta
-   updateSearchInput() // Zaktualizuj pole wyszukiwania po usunięciu wiersza
+   rowsToRemove.forEach(row => tbody.removeChild(row))
+   handleCheckboxChange()
+   updatePagination()
+   checkEmptyTable()
+   updateSearchInput()
 }
 
-// Funkcja do zaznaczania wszystkich wierszy
+// Function to select all rows
 const handleSelectAllButton = () => {
    const checkboxes = document.querySelectorAll('.checkbox')
    const checkedCheckboxes = [...checkboxes].filter(cb => cb.checked)
@@ -677,19 +656,19 @@ const handleSelectAllButton = () => {
    })
 }
 
-// Funkcja wyświetlająca komunikat "Brak elementów do wyświetlenia"
+// Function that displays the message "No items to display"
 const displayNoDataMessage = tbody => {
    const noDataMessage = document.createElement('tr')
+   const previousSearchInput = document.querySelector('.search-input-container')
+   const previousPagination = document.querySelector('.pagination')
    noDataMessage.innerHTML = '<td colspan="7">Brak elementów do wyświetlenia</td>'
    noDataMessage.classList.add('no-row-message')
    tbody.appendChild(noDataMessage)
-   const previousSearchInput = document.querySelector('.search-input-container')
    previousSearchInput?.remove()
-   const previousPagination = document.querySelector('.pagination')
    previousPagination?.remove()
 }
 
-// Funkcja sprawdzająca, czy tabela jest pusta
+// Function to check if a table is empty
 const checkEmptyTable = () => {
    const tbody = document.querySelector('tbody')
    const rows = tbody.querySelectorAll('tr')
@@ -707,7 +686,7 @@ const updateSearchInput = () => {
    }
 }
 
-// Funkcja do formatowania daty
+// Function to format the date
 const formatDate = dateString => {
    const date = new Date(dateString)
    const day = date.getDate()
