@@ -326,38 +326,34 @@ const generateBodyTable = (movieData, category) => {
    return tbody
 }
 
-// Funkcja tworząca paginację
+// Function creating pagination
 const createPageNavigation = () => {
    const myTable = document.querySelectorAll('tr[data-row-data]')
    const main = document.querySelector('main')
-   const navBottomContainer = document.createElement('div')
-   navBottomContainer.classList.add('pagination')
-   // select element
+   const navBottomContainer = createContainer('pagination')
    const selectOptions = [10, 20]
    const selectElement = createSelect(selectOptions)
+   const prevButton = createButton('<i class="fa-solid fa-chevron-left"></i>', 'prevButton')
+   const nextButton = createButton('<i class="fa-solid fa-chevron-right"></i>', 'nextButton')
+   const currentPageInput = createInput('number', 'currentPageInput', 'current-page-input')
+   const currentPageInfo = createElement('span', 'currentPageInfo', 'current-page-info')
+
    itemsPerPage = parseInt(selectElement.value)
    totalPages = Math.ceil(myTable.length / itemsPerPage)
+
+   currentPageInput.max = totalPages
+   currentPageInfo.textContent = ` z ${totalPages}`
+
    selectElement.addEventListener('change', () => {
+      const oldItemsPerPage = itemsPerPage
       itemsPerPage = parseInt(selectElement.value)
-      switch (itemsPerPage) {
-         case 20:
-            --currentPage
-            if (currentPage === 0) {
-               currentPageInput.value = 1
-            } else {
-               currentPageInput.value = currentPage
-            }
-            break
-         case 10:
-            currentPageInput.value = ++currentPage
-            break
-         default:
-            break
-      }
-      totalPages = Math.ceil(myTable.length / itemsPerPage) // Aktualizacja totalPages
+      totalPages = Math.ceil(myTable.length / itemsPerPage)
+      // Adjust the current page number to maintain the correct position in the new pagination
+      currentPage = Math.ceil(((currentPage - 1) * oldItemsPerPage + 1) / itemsPerPage)
+      currentPageInput.value = currentPage
       handlePageChange(currentPage, totalPages, itemsPerPage)
    })
-   const prevButton = createButton('<i class="fa-solid fa-chevron-left"></i>', 'prevButton')
+
    prevButton.addEventListener('click', () => {
       if (currentPage > 1) {
          currentPage--
@@ -365,16 +361,9 @@ const createPageNavigation = () => {
          handlePageChange(currentPage, totalPages, itemsPerPage)
       }
    })
-   // input
-   const currentPageInput = createInput('number', 'currentPageInput', 'current-page-input', '1', '1', totalPages)
-   // Dodaj obsługę zdarzenia zmiany wartości inputa
-   currentPageInput.addEventListener('input', () => {
-      const newPage = currentPageInput.value
-      handlePageChange(newPage, totalPages, itemsPerPage)
-   })
-   // bieżąca strona
-   const currentPageInfo = createElement('span', ` z ${totalPages}`, 'currentPageInfo', 'current-page-info')
-   const nextButton = createButton('<i class="fa-solid fa-chevron-right"></i>', 'nextButton')
+
+   currentPageInput.addEventListener('input', () => handlePageChange(currentPageInput.value, totalPages, itemsPerPage))
+
    nextButton.addEventListener('click', () => {
       if (currentPage < totalPages) {
          currentPage++
@@ -386,57 +375,56 @@ const createPageNavigation = () => {
    main.appendChild(navBottomContainer)
 }
 
+// Function to handle page changes
 const handlePageChange = (newPage, totalPages, itemsPerPage) => {
-   // let currentPage = null
-   // if (newPage < 1) {
-   //    currentPage = 1
-   // } else if (newPage > totalPages) {
-   //    currentPage = totalPages
-   // } else {
-   //    currentPage = newPage
-   // }
    currentPage = Math.min(Math.max(newPage, 1), totalPages)
    updateArrowButtons(currentPage, totalPages)
    updatePageInfo(totalPages)
    displayPage(currentPage, itemsPerPage)
 }
 
+// Function to update the page information
 const updatePageInfo = totalPages => {
    const currentPageInfo = document.querySelector('#currentPageInfo')
-   currentPageInfo.textContent = ` z ${totalPages}`
    const currentPageInput = document.querySelector('#currentPageInput')
+   currentPageInfo.textContent = ` z ${totalPages}`
    currentPageInput.max = parseInt(totalPages)
    if (currentPageInput.value > totalPages) {
       currentPageInput.value = totalPages
    }
 }
 
-// Funkcja aktualizująca stan przycisków strzałek
+// Function that updates the state of the arrow buttons
 const updateArrowButtons = (currentPage, totalPages) => {
    const prevButton = document.querySelector('.prevButton ')
-   prevButton.disabled = currentPage === 1
    const nextButton = document.querySelector('.nextButton')
+   prevButton.disabled = currentPage === 1
    nextButton.disabled = currentPage === totalPages
 }
 
-// Funkcja aktualizująca stan paginacji po usuwaniu wierszy
+// Function to update pagination state after deleting rows
 const updatePagination = () => {
    const rows = document.querySelectorAll('tr[data-row-data]')
-   totalPages = Math.ceil(rows.length / itemsPerPage)
-   const currentPageInfo = document.querySelector('#currentPageInfo')
-   currentPageInfo.textContent = ` z ${totalPages}`
    const remainingRows = document.querySelectorAll('tr[data-row-data]:not(.is-hidden)').length
-   // Sprawdź, czy jesteśmy na ostatniej stronie
-   if (currentPage > totalPages && remainingRows === 0) {
+   const currentPageInfo = document.querySelector('#currentPageInfo')
+   const currentPageInput = document.querySelector('#currentPageInput')
+
+   totalPages = Math.ceil(rows.length / itemsPerPage)
+   currentPageInfo.textContent = ` z ${totalPages}`
+
+   // Check if we are on the last page
+   if (currentPage > totalPages) {
       if (totalPages === 0) {
-         return
+         currentPage = 1 // Set to the first page if there are no pages
+      } else {
+         currentPage-- // Move to the previous page
       }
-      currentPage-- // Przenieś się na poprzednią stronę
-      const currentPageInput = document.querySelector('#currentPageInput')
-      currentPageInput.value = currentPage // Zaktualizuj input z numerem strony
+      currentPageInput.value = currentPage // Update the page number input
       displayPage(currentPage, itemsPerPage)
-      // Sprawdź, czy jesteśmy na innej stronie niż ostatnia
+      // Check if we are on a page other than the last one
    } else if (currentPage <= totalPages && remainingRows === 0) {
+      displayPage(currentPage, itemsPerPage)
+   } else {
       displayPage(currentPage, itemsPerPage)
    }
 }
@@ -517,7 +505,7 @@ const createContainer = (className, text = '') => {
 }
 
 // Funkcja do tworzenia elementów takich jak span, p
-const createElement = (tagName, text, id, className) => {
+const createElement = (tagName, id, className, text = '') => {
    const element = document.createElement(tagName)
    element.innerHTML = `${text}`
    element.id = `${id}`
