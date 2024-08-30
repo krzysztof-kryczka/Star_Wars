@@ -1,6 +1,8 @@
 import { rowData } from '../assets/data/data.js'
 
-// Function to initialize the page
+/**
+ * Initializes the page by creating the header, main section, buttons, logo, and footer.
+ */
 const initializePage = () => {
    createHeader()
    createMain()
@@ -13,34 +15,29 @@ const initializePage = () => {
 let currentPage = 1
 let itemsPerPage = 10
 let totalPages = 1
+let filteredRows = [] // Stores filtered results
 
-// Function to create the header section
+/**
+ * Creates the header section of the page.
+ */
 const createHeader = () => {
    const header = document.createElement('header')
-   const div = document.createElement('div')
-   const character = createElement(
+   const div = createContainer('header-container')
+   const character = createTextElement(
       'p',
+      ['character'],
       'Write <span class="hero">VADER</span> or <span class="hero">YODA</span>. You should be amazed!!!',
-      'character',
-      'character',
    )
-   const divToggle = document.createElement('div')
-   const checkbox = createCheckbox()
-   const label = document.createElement('label')
-   const moonIcon = document.createElement('i')
-   const sunIcon = document.createElement('i')
-   const orb = document.createElement('div')
-
-   div.classList.add('header-container')
-   checkbox.classList.add('checkbox-theme')
-   label.classList.add('label')
-   moonIcon.classList.add('fa-moon', 'fas')
-   sunIcon.classList.add('fa-sun', 'fas')
-   orb.classList.add('orb')
+   const divToggle = createContainer('container-theme')
+   const checkbox = createCheckbox('checkbox-theme')
+   const label = createTextElement('label', ['label'])
+   const moonIcon = createTextElement('i', ['fa-moon', 'fas'])
+   const sunIcon = createTextElement('i', ['fa-sun', 'fas'])
+   const orb = createContainer('orb')
 
    // Set the ID and htmlFor attribute for the checkbox and label
    checkbox.id = 'themeSwitch'
-   label.htmlFor = 'themeSwitch'
+   label.setAttribute('for', checkbox.id)
 
    label.append(moonIcon, sunIcon, orb)
    divToggle.append(checkbox, label)
@@ -54,7 +51,9 @@ const createHeader = () => {
    document.documentElement.setAttribute('data-theme', 'light')
 }
 
-// Function to change the theme
+/**
+ * Changes the theme of the page between light and dark.
+ */
 const changeTheme = () => {
    const themeSwitch = document.querySelector('#themeSwitch')
    // Determine the theme based on the checkbox state
@@ -71,7 +70,7 @@ document.addEventListener('keydown', event => {
    const vaderAudio = new Audio('./assets/audio/darth_vader.mp3')
    const yodaAudio = new Audio('./assets/audio/Yoda_Yoda.mp3')
    // Append the pressed key to the typedWord variable
-   typedWord = `${typedWord}` + event.key.toLowerCase()
+   typedWord = `${typedWord}` + event.key
    // Check if the typed word includes 'vader' or 'yoda' and play the corresponding audio
    if (typedWord.includes('vader')) {
       playAudio(vaderAudio)
@@ -80,7 +79,11 @@ document.addEventListener('keydown', event => {
    }
 })
 
-// Function to play the audio
+/**
+ * Plays the given audio, pausing any currently playing audio.
+ *
+ * @param {HTMLAudioElement} audio - The audio element to play.
+ */
 const playAudio = audio => {
    // Pause and reset the current audio if it is playing
    if (currentAudio) {
@@ -94,19 +97,22 @@ const playAudio = audio => {
    typedWord = ''
 }
 
-// Function to create the main section
+/**
+ * Creates the main section of the page.
+ */
 const createMain = () => {
    const main = document.createElement('main')
    document.body.appendChild(main)
 }
 
-// Function to create buttons based on the keys of the rowData object
+/**
+ * Creates buttons based on the keys of the rowData object.
+ */
 const createButtons = () => {
    // Get the keys from the rowData object
    const keys = Object.keys(rowData)
    const main = document.querySelector('main')
-   const buttonContainer = document.createElement('div')
-   buttonContainer.classList.add('button-container')
+   const buttonContainer = createContainer('button-container')
    // Document fragment for better performance
    // https://developer.mozilla.org/en-US/docs/Web/API/Document/createDocumentFragment
    const fragment = document.createDocumentFragment()
@@ -121,7 +127,11 @@ const createButtons = () => {
    main.appendChild(buttonContainer)
 }
 
-// Function to handle button click
+/**
+ * Handles the click event for category buttons.
+ *
+ * @param {Event} e - The click event.
+ */
 const handleButtonClick = e => {
    removeLogo()
    const main = document.querySelector('main')
@@ -142,45 +152,52 @@ const handleButtonClick = e => {
 
    main.appendChild(table)
    createSearchInput(category)
-   displayPage(1, 10)
+   displayPage(currentPage, itemsPerPage, null, false)
    createPageNavigation()
    updateArrowButtons(currentPage, totalPages)
 }
 
-// Funkcja do wyświetlania ograniczonej liczby rekordów
-const displayPage = (currentPage, itemsPerPage) => {
-   const items = document.querySelectorAll('tr[data-row-data]')
+/**
+ * Displays a specific page of items in a table.
+ *
+ * @param {number} currentPage - The current page number to display.
+ * @param {number} itemsPerPage - The number of items to display per page.
+ * @param {Array} [filteredRows=null] - An optional array of filtered rows to display.
+ * @param {boolean} [useFilter=false] - A flag indicating whether to use the filtered rows.
+ */
+const displayPage = (currentPage, itemsPerPage, filteredRows = null, useFilter = false) => {
+   const items = useFilter ? filteredRows : document.querySelectorAll('tr[data-row-data]')
    const startIndex = (currentPage - 1) * itemsPerPage
    const endIndex = currentPage * itemsPerPage
    items.forEach((row, index) => {
       if (index >= startIndex && index < endIndex) {
-         row.classList.remove('is-hidden') // Pokazujemy wiersze na danej stronie
+         row.classList.remove('is-hidden')
       } else {
-         row.classList.add('is-hidden') // Ukrywamy pozostałe wiersze
+         row.classList.add('is-hidden')
       }
    })
 }
 
-// Funkcja tworząca input search
+/**
+ * Creates and inserts a search input container for filtering table rows.
+ *
+ * @param {string} category - The category to determine the search input placeholder text.
+ */
 const createSearchInput = category => {
-   const searchInputContainer = document.createElement('div')
-   searchInputContainer.classList.add('search-input-container')
+   const searchInputContainer = createContainer('search-input-container')
    const visibleRows = document.querySelectorAll('tbody tr[data-row-data]')
    const searchInputId = createInput('number', 'searchInputId', 'search-input-id', 'index', '1', '1000')
-   const labelElementId = document.createElement('label')
-   labelElementId.textContent = 'Search by index:'
-   labelElementId.setAttribute('for', searchInputId.id)
-   const amountRecords = createElement(
+   const labelElementId = createTextElement('label', ['lbl-search-id'], 'Search by index:')
+   const labelElementNameOrTitle = createTextElement('label', ['lbl-search-text'], 'Search by text:')
+   const amountRecords = createTextElement(
       'p',
+      ['amount-records'],
       `Amount of records: <span class="total">${visibleRows.length}</span>`,
-      'amount-records',
-      'amount-records',
    )
-   const totalRecordsFound = createElement(
+   const totalRecordsFound = createTextElement(
       'p',
+      ['total-records-found'],
       'Total records found: <span class="total">0</span>',
-      'total-records-found',
-      'total-records-found',
    )
    const searchInputNameOrTitle = createInput(
       'string',
@@ -190,9 +207,10 @@ const createSearchInput = category => {
       '1',
       '1000',
    )
-   const labelElementNameOrTitle = document.createElement('label')
-   labelElementNameOrTitle.textContent = 'Search by text:'
+   // Set the 'for' attribute for the labels to link them with the corresponding inputs
+   labelElementId.setAttribute('for', searchInputId.id)
    labelElementNameOrTitle.setAttribute('for', searchInputNameOrTitle.id)
+
    searchInputContainer.append(
       amountRecords,
       labelElementId,
@@ -202,7 +220,8 @@ const createSearchInput = category => {
       totalRecordsFound,
    )
    const table = document.querySelector('table')
-   table.parentNode.insertBefore(searchInputContainer, table) // Wstaw nowy element przed istniejącym
+   table.parentNode.insertBefore(searchInputContainer, table)
+
    searchInputId.addEventListener('input', e => {
       handleSearchInput(e, 'tbody td:nth-child(2n+1)', false)
    })
@@ -211,48 +230,67 @@ const createSearchInput = category => {
    })
 }
 
-// Funkcja obsługująca zdarzenie wprowadzania id lub tekstu w inpucie
+/**
+ * Handles the input event for search functionality.
+ *
+ * @param {Event} e - The input event.
+ * @param {string} cellIndex - The CSS selector for the table cell to search within.
+ * @param {boolean} useIncludes - Whether to use the includes method for matching.
+ */
 const handleSearchInput = (e, cellIndex, useIncludes) => {
    const inputValue = e.target.value.toLowerCase()
    const tableRows = document.querySelectorAll('tbody tr[data-row-data]')
-   const noRowMessage = document.querySelector('.no-row-message')
-   let foundRow = false
-   noRowMessage?.remove()
-   tableRows.forEach(row => {
+   document.querySelector('.no-row-message')?.remove()
+
+   filteredRows = Array.from(tableRows).filter(row => {
       const cell = row.querySelector(`${cellIndex}`)
       if (cell) {
-         const cellValue = cell?.textContent.toLowerCase()
+         const cellValue = cell.textContent.toLowerCase()
          if (
             // prettier-ignore
             useIncludes && cellValue.includes(inputValue) ||
             !useIncludes && cellValue === inputValue ||
             inputValue === ''
          ) {
-            row.classList.remove('is-hidden')
-            foundRow = true
-         } else {
-            row.classList.add('is-hidden')
+            return true
          }
       }
+      return false
    })
-   if (!foundRow) {
+
+   // Hide all rows initially
+   tableRows.forEach(row => row.classList.add('is-hidden'))
+
+   if (filteredRows.length > 0) {
+      currentPage = 1
+      displayPage(currentPage, itemsPerPage, filteredRows, true) // Display first page of filtered rows
+   } else {
+      tableRows.forEach(row => row.classList.add('is-hidden'))
       const newNoRowMessage = document.createElement('tr')
+      const noRowCell = createCell('Nie znaleziono pasującego wiersza.')
       newNoRowMessage.classList.add('no-row-message')
-      const noRowCell = document.createElement('td')
-      noRowCell.textContent = 'Nie znaleziono pasującego wiersza.'
       noRowCell.colSpan = tableRows[0].children.length
       newNoRowMessage.appendChild(noRowCell)
-      document.querySelector('table').appendChild(newNoRowMessage)
+      document.querySelector('table tbody').appendChild(newNoRowMessage)
    }
-   // Dodaj informację o liczbie znalezionych rekordów
-   const visibleRows = document.querySelectorAll('tbody tr:not(.is-hidden)')
+
+   // Update the total records found information
    const totalRecords = document.querySelector('.total-records-found')
    if (totalRecords) {
-      totalRecords.innerHTML = `Total records found: <span class='total'>${visibleRows.length}</span>`
+      totalRecords.innerHTML = `Total records found: <span class='total'>${filteredRows.length}</span>`
    }
+
+   // Update pagination based on the filtered rows
+   updatePagination(filteredRows.length > 0 ? filteredRows : [])
 }
 
-// Function that creates a table
+/**
+ * Creates a table element with headers and body rows based on the provided movie data and category.
+ *
+ * @param {Array} movieData - The data to populate the table rows.
+ * @param {string} category - The category to determine the table headers.
+ * @returns {HTMLTableElement} - The created table element.
+ */
 const createTable = (movieData, category) => {
    const table = document.createElement('table')
    const thead = document.createElement('thead')
@@ -275,7 +313,13 @@ const createTable = (movieData, category) => {
    return table
 }
 
-// Function to generate a list of headers based on the category
+/**
+ * Returns an array of headers based on the provided movie data and category.
+ *
+ * @param {Array} movieData - The data to determine the headers.
+ * @param {string} category - The category to determine the specific headers.
+ * @returns {Array} - An array of headers for the specified category.
+ */
 const getHeadersForCategory = (movieData, category) => {
    const headersCreatedActions = ['CREATED', 'ACTIONS']
    const keys = Object.keys(movieData[0]).slice(0, 3) // First three keys from movieData[0]
@@ -297,13 +341,19 @@ const getHeadersForCategory = (movieData, category) => {
    return keyMapping[category] || []
 }
 
-// Function to generate tbody based on the movieData object
+/**
+ * Generates the table body rows based on the provided movie data and category.
+ *
+ * @param {Array} movieData - The data to populate the table rows.
+ * @param {string} category - The category to determine the table structure.
+ * @returns {HTMLTableSectionElement} - The created table body element.
+ */
 const generateBodyTable = (movieData, category) => {
    const tbody = document.createElement('tbody')
    tbody.innerHTML = ''
    if (movieData.length === 0) {
       displayNoDataMessage(tbody)
-      return
+      return tbody
    }
    movieData.forEach((item, index) => {
       const row = document.createElement('tr')
@@ -326,34 +376,28 @@ const generateBodyTable = (movieData, category) => {
    return tbody
 }
 
-// Function creating pagination
+/**
+ * Creates and inserts pagination controls for navigating table pages.
+ */
 const createPageNavigation = () => {
    const myTable = document.querySelectorAll('tr[data-row-data]')
    const main = document.querySelector('main')
    const navBottomContainer = createContainer('pagination')
-   const selectOptions = [10, 20]
+   const selectOptions = [10, 20] // Define options for items per page
    const selectElement = createSelect(selectOptions)
    const prevButton = createButton('<i class="fa-solid fa-chevron-left"></i>', 'prevButton')
    const nextButton = createButton('<i class="fa-solid fa-chevron-right"></i>', 'nextButton')
    const currentPageInput = createInput('number', 'currentPageInput', 'current-page-input')
-   const currentPageInfo = createElement('span', 'currentPageInfo', 'current-page-info')
+   const currentPageInfo = createTextElement('span', ['current-page-info'])
 
    itemsPerPage = parseInt(selectElement.value)
    totalPages = Math.ceil(myTable.length / itemsPerPage)
 
    currentPageInput.max = totalPages
    currentPageInfo.textContent = ` z ${totalPages}`
-
-   selectElement.addEventListener('change', () => {
-      const oldItemsPerPage = itemsPerPage
-      itemsPerPage = parseInt(selectElement.value)
-      totalPages = Math.ceil(myTable.length / itemsPerPage)
-      // Adjust the current page number to maintain the correct position in the new pagination
-      currentPage = Math.ceil(((currentPage - 1) * oldItemsPerPage + 1) / itemsPerPage)
-      currentPageInput.value = currentPage
-      handlePageChange(currentPage, totalPages, itemsPerPage)
-   })
-
+   // Add event listener to update items per page when the select value changes
+   selectElement.addEventListener('change', updateItemsPerPage)
+   // Add event listener to handle previous button click
    prevButton.addEventListener('click', () => {
       if (currentPage > 1) {
          currentPage--
@@ -361,9 +405,9 @@ const createPageNavigation = () => {
          handlePageChange(currentPage, totalPages, itemsPerPage)
       }
    })
-
+   // Add event listener to handle input change for the current page input
    currentPageInput.addEventListener('input', () => handlePageChange(currentPageInput.value, totalPages, itemsPerPage))
-
+   // Add event listener to handle next button click
    nextButton.addEventListener('click', () => {
       if (currentPage < totalPages) {
          currentPage++
@@ -375,17 +419,44 @@ const createPageNavigation = () => {
    main.appendChild(navBottomContainer)
 }
 
-// Function to handle page changes
+/**
+ * Updates the number of items displayed per page and adjusts pagination accordingly.
+ */
+const updateItemsPerPage = () => {
+   const currentPageInput = document.querySelector('#currentPageInput')
+   const selectElement = document.querySelector('select')
+   const oldItemsPerPage = itemsPerPage
+   const visibleRows = filteredRows.length > 0 ? filteredRows : document.querySelectorAll('tbody tr[data-row-data]')
+   itemsPerPage = parseInt(selectElement.value)
+   totalPages = Math.ceil(visibleRows.length / itemsPerPage)
+   // Adjust the current page number to maintain the correct position in the new pagination
+   currentPage = Math.ceil(((currentPage - 1) * oldItemsPerPage + 1) / itemsPerPage)
+   currentPageInput.value = currentPage
+   handlePageChange(currentPage, totalPages, itemsPerPage)
+}
+
+/**
+ * Handles the change of the current page, updating the display and pagination controls.
+ *
+ * @param {number} newPage - The new page number to display.
+ * @param {number} totalPages - The total number of pages available.
+ * @param {number} itemsPerPage - The number of items to display per page.
+ */
 const handlePageChange = (newPage, totalPages, itemsPerPage) => {
    currentPage = Math.min(Math.max(newPage, 1), totalPages)
    updateArrowButtons(currentPage, totalPages)
    updatePageInfo(totalPages)
-   displayPage(currentPage, itemsPerPage)
+   const useFilter = filteredRows.length > 0
+   displayPage(currentPage, itemsPerPage, filteredRows, useFilter)
 }
 
-// Function to update the page information
+/**
+ * Updates the page information display and adjusts the current page input's maximum value.
+ *
+ * @param {number} totalPages - The total number of pages available.
+ */
 const updatePageInfo = totalPages => {
-   const currentPageInfo = document.querySelector('#currentPageInfo')
+   const currentPageInfo = document.querySelector('.current-page-info')
    const currentPageInput = document.querySelector('#currentPageInput')
    currentPageInfo.textContent = ` z ${totalPages}`
    currentPageInput.max = parseInt(totalPages)
@@ -394,73 +465,92 @@ const updatePageInfo = totalPages => {
    }
 }
 
-// Function that updates the state of the arrow buttons
+/**
+ * Updates the state of the pagination arrow buttons based on the current page and total pages.
+ *
+ * @param {number} currentPage - The current page number.
+ * @param {number} totalPages - The total number of pages available.
+ */
 const updateArrowButtons = (currentPage, totalPages) => {
    const prevButton = document.querySelector('.prevButton ')
    const nextButton = document.querySelector('.nextButton')
-   prevButton.disabled = currentPage === 1
-   nextButton.disabled = currentPage === totalPages
+   if (currentPage === 0) {
+      document.querySelector('.pagination').classList.add('is-hidden')
+   } else {
+      document.querySelector('.pagination').classList.remove('is-hidden')
+      prevButton.disabled = currentPage === 1
+      nextButton.disabled = currentPage === totalPages
+   }
 }
 
-// Function to update pagination state after deleting rows
-const updatePagination = () => {
-   const rows = document.querySelectorAll('tr[data-row-data]')
-   const remainingRows = document.querySelectorAll('tr[data-row-data]:not(.is-hidden)').length
-   const currentPageInfo = document.querySelector('#currentPageInfo')
+/**
+ * Updates the pagination controls and displays the appropriate page of items.
+ *
+ * @param {Array} [filteredRows=null] - An optional array of filtered rows to use for pagination.
+ */
+const updatePagination = (filteredRows = null) => {
+   const rows = filteredRows ? filteredRows.length : document.querySelectorAll('tr[data-row-data]').length
+   const remainingRows = filteredRows
+      ? filteredRows.length
+      : document.querySelectorAll('tr[data-row-data]:not(.is-hidden)').length
+   const currentPageInfo = document.querySelector('.current-page-info')
    const currentPageInput = document.querySelector('#currentPageInput')
 
-   totalPages = Math.ceil(rows.length / itemsPerPage)
+   totalPages = Math.ceil((filteredRows ? remainingRows : rows) / itemsPerPage)
+
+   if (totalPages === 0) {
+      currentPage = 0
+      currentPageInput.value = currentPage
+   } else {
+      currentPageInput.value = currentPage
+   }
+
    currentPageInfo.textContent = ` z ${totalPages}`
 
    // Check if we are on the last page
    if (currentPage > totalPages) {
-      if (totalPages === 0) {
-         currentPage = 1 // Set to the first page if there are no pages
-      } else {
-         currentPage-- // Move to the previous page
-      }
+      currentPage = totalPages === 0 ? 1 : totalPages // Set to the first page if there are no pages, else to the last page
       currentPageInput.value = currentPage // Update the page number input
-      displayPage(currentPage, itemsPerPage)
+      displayPage(currentPage, itemsPerPage, filteredRows, !!filteredRows)
       // Check if we are on a page other than the last one
    } else if (currentPage <= totalPages && remainingRows === 0) {
-      displayPage(currentPage, itemsPerPage)
-   } else {
-      displayPage(currentPage, itemsPerPage)
+      currentPageInput.value = currentPage
+      displayPage(currentPage, itemsPerPage, filteredRows, !!filteredRows)
    }
+   updateArrowButtons(currentPage, totalPages)
 }
 
-// Dodawanie logo Star Wars
+/**
+ * Creates and inserts a Star Wars logo into the main element.
+ */
 const createLogoSW = () => {
-   const logoContainer = document.createElement('div')
-   logoContainer.classList.add('logo-container')
-   const starWarsLogo = document.createElement('img')
-   starWarsLogo.classList.add('sw-image')
-   starWarsLogo.src = './assets/images/starwars_logo.jpg'
-   starWarsLogo.alt = 'Star Wars Logo'
+   const logoContainer = createContainer('logo-container')
+   const starWarsLogo = createImage('sw-image', './assets/images/starwars_logo.jpg', 'Star Wars Logo')
    const main = document.querySelector('main')
    logoContainer.appendChild(starWarsLogo)
    main.appendChild(logoContainer)
 }
 
-// Usuwanie logo Star Wars z drzewa DOM
-const removeLogo = () => {
-   const logoContainer = document.querySelector('.logo-container')
-   if (logoContainer) {
-      logoContainer.remove() // Usuń kontener z drzewa DOM
-   }
-}
+// Removing the Star Wars logo from the DOM tree
+const removeLogo = () => document.querySelector('.logo-container')?.remove()
 
-// Tworzenie stopki (section: footer)
+/**
+ * Removes the Star Wars logo container from the DOM tree
+ */
 const createFooter = () => {
    const footer = document.createElement('footer')
-   const authorInfo = document.createElement('p')
-   authorInfo.textContent = '© Projekt i realizacja strony: Krzysztof Kryczka - 2024'
+   const authorInfo = createTextElement('p', ['author-info'], '© Projekt i realizacja strony: Krzysztof Kryczka - 2024')
    footer.appendChild(authorInfo)
    document.body.appendChild(footer)
 }
 
-/// Funkcje pomocnicze
-
+/**
+ * Creates a button element with specified text and class name.
+ *
+ * @param {string} text - The text to display inside the button.
+ * @param {string} className - The class name to add to the button.
+ * @returns {HTMLButtonElement} - The created button element.
+ */
 const createButton = (text, className) => {
    const button = document.createElement('button')
    button.innerHTML = `${text}`
@@ -468,12 +558,25 @@ const createButton = (text, className) => {
    return button
 }
 
-const createCheckbox = () => {
+/**
+ * Creates a checkbox input element with a specified class name.
+ *
+ * @param {string} className - The class name to add to the checkbox.
+ * @returns {HTMLInputElement} - The created checkbox input element.
+ */
+const createCheckbox = className => {
    const checkbox = document.createElement('input')
    checkbox.type = 'checkbox'
+   checkbox.classList.add(className)
    return checkbox
 }
 
+/**
+ * Creates a select element with specified options.
+ *
+ * @param {Array} options - An array of option values to add to the select element.
+ * @returns {HTMLSelectElement} - The created select element.
+ */
 const createSelect = options => {
    const select = document.createElement('select')
    for (const optionValue of options) {
@@ -485,6 +588,17 @@ const createSelect = options => {
    return select
 }
 
+/**
+ * Creates an input element with specified attributes.
+ *
+ * @param {string} type - The type of the input element.
+ * @param {string} id - The id of the input element.
+ * @param {string} className - The class name to add to the input element.
+ * @param {string} [placeholder=1] - The placeholder text for the input element.
+ * @param {number} [min=1] - The minimum value for the input element.
+ * @param {number} [max=1] - The maximum value for the input element.
+ * @returns {HTMLInputElement} - The created input element.
+ */
 const createInput = (type, id, className, placeholder = 1, min = 1, max = 1) => {
    const input = document.createElement('input')
    input.type = `${type}`
@@ -496,7 +610,13 @@ const createInput = (type, id, className, placeholder = 1, min = 1, max = 1) => 
    return input
 }
 
-// Function to create a div element
+/**
+ * Creates a div container with specified class name and optional text content.
+ *
+ * @param {string} className - The class name to add to the container.
+ * @param {string} [text=''] - The optional text content for the container.
+ * @returns {HTMLDivElement} - The created div container.
+ */
 const createContainer = (className, text = '') => {
    const div = document.createElement('div')
    div.textContent = `${text}`
@@ -504,13 +624,35 @@ const createContainer = (className, text = '') => {
    return div
 }
 
-// Funkcja do tworzenia elementów takich jak span, p
-const createElement = (tagName, id, className, text = '') => {
+/**
+ * Creates a text element with specified tag name, class names, and text content.
+ *
+ * @param {string} tagName - The tag name for the text element (e.g., 'p', 'span').
+ * @param {Array} [className=[]] - An array of class names to add to the text element.
+ * @param {string} [text=''] - The text content for the text element.
+ * @returns {HTMLElement} - The created text element.
+ */
+const createTextElement = (tagName, className = [], text = '') => {
    const element = document.createElement(tagName)
    element.innerHTML = `${text}`
-   element.id = `${id}`
-   element.classList.add(className)
+   element.classList.add(...className)
    return element
+}
+
+/**
+ * Creates an image element with specified class name, source URL, and alt text.
+ *
+ * @param {string} className - The class name to add to the image element.
+ * @param {string} src - The source URL for the image.
+ * @param {string} alt - The alt text for the image.
+ * @returns {HTMLImageElement} - The created image element.
+ */
+const createImage = (className, src, alt) => {
+   const img = document.createElement('img')
+   img.classList.add(className)
+   img.src = `${src}`
+   img.alt = `${alt}`
+   return img
 }
 
 // Function to create table cells with SW API
@@ -523,23 +665,32 @@ const createBasicStarWarsCell = text => {
    return cell
 }
 
-// Function to create a table cell element
+/**
+ * Creates a table cell element with specified text content.
+ *
+ * @param {string} row - The text content for the cell.
+ * @returns {HTMLTableCellElement} - The created table cell element.
+ */
 const createCell = row => {
    const cell = document.createElement('td')
    cell.textContent = `${row}`
    return cell
 }
 
-// Function to create a cell with action buttons and a checkbox
+/**
+ * Creates a table cell containing action buttons and a checkbox.
+ *
+ * @param {HTMLTableRowElement} row - The table row element to associate with the action buttons.
+ * @returns {HTMLTableCellElement} - The created table cell with action buttons and a checkbox.
+ */
 const createActionsCell = row => {
    const createdCell = document.createElement('td')
    const buttonContainer = createContainer('buttons-td')
    const trashButton = createButton('<i class="fa-solid fa-trash-can"></i>', 'remove-button')
    const infoButton = createButton('<i class="fa-solid fa-plus"></i>', 'info-button')
-   const checkbox = createCheckbox()
+   const checkbox = createCheckbox('checkbox')
 
    infoButton.setAttribute('data-target', 'data-modal-open')
-   checkbox.classList.add('checkbox')
 
    // Add an event listener to the trash button to remove the row when clicked
    trashButton.addEventListener('click', () => removeRows([row]))
@@ -553,7 +704,9 @@ const createActionsCell = row => {
    return createdCell
 }
 
-// Function to handle the checkbox change event
+/**
+ * Handles changes to checkboxes, updating the state of 'Remove All' and 'Select All' buttons.
+ */
 const handleCheckboxChange = () => {
    const checkboxes = document.querySelectorAll('.checkbox')
    // Filter the checkboxes to find the ones that are checked
@@ -573,14 +726,20 @@ const handleCheckboxChange = () => {
    }
 }
 
-// Function to handle the info button click event
+/**
+ * Handles the click event for the info button, showing a modal with row data.
+ *
+ * @param {HTMLTableRowElement} row - The table row element associated with the info button.
+ */
 const handleInfoButtonClick = row => {
    const { rowData } = row.dataset
    const parsedData = JSON.parse(rowData)
    showModal(parsedData)
 }
 
-// Function creates and adds "Remove all" and "Select all" buttons to the first visible row in the table
+/**
+ * Creates 'Remove All' and 'Select All' buttons and appends them to the first visible row.
+ */
 const createRemoveSelectAllButton = () => {
    const firstRow = document.querySelector('tbody tr[data-row-data]:not(.is-hidden)')
    const buttonCell = firstRow.querySelector('td:nth-child(6)')
@@ -593,7 +752,9 @@ const createRemoveSelectAllButton = () => {
    buttonCell.appendChild(buttonContainer)
 }
 
-// Function to remove selected rows
+/**
+ * Handles the click event for the 'Remove All' button, removing all selected rows.
+ */
 const handleRemoveAllButton = () => {
    const checkboxes = document.querySelectorAll('.checkbox')
    const selectedRows = []
@@ -607,17 +768,23 @@ const handleRemoveAllButton = () => {
    removeRows(selectedRows)
 }
 
-// Main function to delete rows
+/**
+ * Removes the specified rows from the table and updates the pagination and search input.
+ *
+ * @param {Array} rowsToRemove - An array of table row elements to remove.
+ */
 const removeRows = rowsToRemove => {
    const tbody = document.querySelector('tbody')
    rowsToRemove.forEach(row => tbody.removeChild(row))
    handleCheckboxChange()
-   updatePagination()
    checkEmptyTable()
+   updatePagination()
    updateSearchInput()
 }
 
-// Function to select all rows
+/**
+ * Handles the click event for the 'Select All' button, selecting all checkboxes in visible rows.
+ */
 const handleSelectAllButton = () => {
    const checkboxes = document.querySelectorAll('.checkbox')
    const checkedCheckboxes = [...checkboxes].filter(cb => cb.checked)
@@ -631,19 +798,25 @@ const handleSelectAllButton = () => {
    })
 }
 
-// Function that displays the message "No items to display"
+/**
+ * Displays a message indicating no data is available in the table.
+ *
+ * @param {HTMLTableSectionElement} tbody - The table body element to append the message to.
+ */
 const displayNoDataMessage = tbody => {
+   const columnCount = document.querySelector('thead tr').children.length
    const noDataMessage = document.createElement('tr')
-   const previousSearchInput = document.querySelector('.search-input-container')
-   const previousPagination = document.querySelector('.pagination')
-   noDataMessage.innerHTML = '<td colspan="7">Brak elementów do wyświetlenia</td>'
+   const noDataCell = createCell('Brak elementów do wyświetlenia')
+   noDataCell.colSpan = columnCount
    noDataMessage.classList.add('no-row-message')
+   noDataMessage.appendChild(noDataCell)
    tbody.appendChild(noDataMessage)
-   previousSearchInput?.remove()
-   previousPagination?.remove()
+   document.querySelector('.search-input-container')?.remove()
 }
 
-// Function to check if a table is empty
+/**
+ * Checks if the table is empty and displays a "no data" message if it is.
+ */
 const checkEmptyTable = () => {
    const tbody = document.querySelector('tbody')
    const rows = tbody.querySelectorAll('tr')
@@ -652,7 +825,9 @@ const checkEmptyTable = () => {
    }
 }
 
-// Funkcja odświeża widok Search Input po usunięciu wiersza tabeli
+/**
+ * Updates the search input by removing the previous one and creating a new one.
+ */
 const updateSearchInput = () => {
    const previousSearchInput = document.querySelector('.search-input-container')
    if (previousSearchInput) {
@@ -661,7 +836,12 @@ const updateSearchInput = () => {
    }
 }
 
-// Function to format the date
+/**
+ * Formats a date string into a "day-month-year" format.
+ *
+ * @param {string} dateString - The date string to format.
+ * @returns {string} - The formatted date string.
+ */
 const formatDate = dateString => {
    const date = new Date(dateString)
    const day = date.getDate()
@@ -670,7 +850,11 @@ const formatDate = dateString => {
    return `${day}-${month}-${year}`
 }
 
-// Funkcja do wyświetlania okna modalnego
+/**
+ * Displays a modal with the provided data.
+ *
+ * @param {Object} data - The data to display in the modal.
+ */
 const showModal = data => {
    const modal = document.createElement('div')
    modal.classList.add('modal')
@@ -685,9 +869,7 @@ const showModal = data => {
       const text = data[key]
       const urlArray = text.toString().split(',').join(',\n')
       valueCell.textContent = urlArray
-      // valueCell.textContent = data[key]
-      row.appendChild(keyCell)
-      row.appendChild(valueCell)
+      row.append(keyCell, valueCell)
       table.appendChild(row)
    }
    modal.appendChild(table)
@@ -700,12 +882,14 @@ const showModal = data => {
    document.body.appendChild(modal)
 }
 
-// Funkcja do zamykania okna modalnego
-const closeModal = modal => {
-   if (modal) {
-      modal.remove() // Usuń element z drzewa DOM
-   }
-}
+/**
+ * Closes the modal by removing it from the document.
+ *
+ * @param {HTMLElement} modal - The modal element to remove.
+ */
+const closeModal = modal => modal?.remove()
 
-// Wywołanie funkcji inicjalizującej po załadowaniu strony
+/**
+ * Initializes the page when the window loads.
+ */
 window.addEventListener('load', initializePage)
