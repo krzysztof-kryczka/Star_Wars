@@ -152,9 +152,13 @@ const handleButtonClick = e => {
 
    main.appendChild(table)
    createSearchInput(category)
-   displayPage(currentPage, itemsPerPage, null, false)
+   currentPage = 1
+   itemsPerPage = 10
+   totalPages = 1
+   filteredRows = []
+   displayPage(currentPage, itemsPerPage, filteredRows, false)
    createPageNavigation()
-   updateArrowButtons(currentPage, totalPages)
+   updateArrowButtons()
 }
 
 /**
@@ -165,7 +169,7 @@ const handleButtonClick = e => {
  * @param {Array} [filteredRows=null] - An optional array of filtered rows to display.
  * @param {boolean} [useFilter=false] - A flag indicating whether to use the filtered rows.
  */
-const displayPage = (currentPage, itemsPerPage, filteredRows = null, useFilter = false) => {
+const displayPage = (currentPage, itemsPerPage, filteredRows = [], useFilter = false) => {
    const items = useFilter ? filteredRows : document.querySelectorAll('tr[data-row-data]')
    const startIndex = (currentPage - 1) * itemsPerPage
    const endIndex = currentPage * itemsPerPage
@@ -244,18 +248,14 @@ const handleSearchInput = (e, cellIndex, useIncludes) => {
 
    filteredRows = Array.from(tableRows).filter(row => {
       const cell = row.querySelector(`${cellIndex}`)
-      if (cell) {
-         const cellValue = cell.textContent.toLowerCase()
-         if (
-            // prettier-ignore
-            useIncludes && cellValue.includes(inputValue) ||
-            !useIncludes && cellValue === inputValue ||
-            inputValue === ''
-         ) {
-            return true
-         }
-      }
-      return false
+      if (!cell) return false // Skip if cell is not found
+      const cellValue = cell.textContent.toLowerCase()
+      return (
+         // prettier-ignore
+         useIncludes && cellValue.includes(inputValue) ||
+         !useIncludes && cellValue === inputValue ||
+         inputValue === ''
+      )
    })
 
    // Hide all rows initially
@@ -398,23 +398,11 @@ const createPageNavigation = () => {
    // Add event listener to update items per page when the select value changes
    selectElement.addEventListener('change', updateItemsPerPage)
    // Add event listener to handle previous button click
-   prevButton.addEventListener('click', () => {
-      if (currentPage > 1) {
-         currentPage--
-         currentPageInput.value = currentPage
-         handlePageChange(currentPage, totalPages, itemsPerPage)
-      }
-   })
+   prevButton.addEventListener('click', () => handlePageChange(--currentPage))
    // Add event listener to handle input change for the current page input
-   currentPageInput.addEventListener('input', () => handlePageChange(currentPageInput.value, totalPages, itemsPerPage))
+   currentPageInput.addEventListener('input', () => handlePageChange(parseInt(currentPageInput.value)))
    // Add event listener to handle next button click
-   nextButton.addEventListener('click', () => {
-      if (currentPage < totalPages) {
-         currentPage++
-         currentPageInput.value = currentPage
-         handlePageChange(currentPage, totalPages, itemsPerPage)
-      }
-   })
+   nextButton.addEventListener('click', () => handlePageChange(++currentPage))
    navBottomContainer.append(prevButton, currentPageInput, currentPageInfo, nextButton, selectElement)
    main.appendChild(navBottomContainer)
 }
@@ -432,63 +420,50 @@ const updateItemsPerPage = () => {
    // Adjust the current page number to maintain the correct position in the new pagination
    currentPage = Math.ceil(((currentPage - 1) * oldItemsPerPage + 1) / itemsPerPage)
    currentPageInput.value = currentPage
-   handlePageChange(currentPage, totalPages, itemsPerPage)
+   handlePageChange(currentPage)
 }
 
 /**
  * Handles the change of the current page, updating the display and pagination controls.
  *
  * @param {number} newPage - The new page number to display.
- * @param {number} totalPages - The total number of pages available.
- * @param {number} itemsPerPage - The number of items to display per page.
  */
-const handlePageChange = (newPage, totalPages, itemsPerPage) => {
+const handlePageChange = newPage => {
    currentPage = Math.min(Math.max(newPage, 1), totalPages)
-   updateArrowButtons(currentPage, totalPages)
-   updatePageInfo(totalPages)
+   updateArrowButtons()
+   updatePageInfo()
    const useFilter = filteredRows.length > 0
    displayPage(currentPage, itemsPerPage, filteredRows, useFilter)
 }
 
 /**
  * Updates the page information display and adjusts the current page input's maximum value.
- *
- * @param {number} totalPages - The total number of pages available.
  */
-const updatePageInfo = totalPages => {
+const updatePageInfo = () => {
    const currentPageInfo = document.querySelector('.current-page-info')
    const currentPageInput = document.querySelector('#currentPageInput')
    currentPageInfo.textContent = ` z ${totalPages}`
    currentPageInput.max = parseInt(totalPages)
-   if (currentPageInput.value > totalPages) {
-      currentPageInput.value = totalPages
-   }
+   currentPageInput.value = currentPageInput.value > totalPages ? totalPages : currentPage
 }
 
 /**
  * Updates the state of the pagination arrow buttons based on the current page and total pages.
- *
- * @param {number} currentPage - The current page number.
- * @param {number} totalPages - The total number of pages available.
  */
-const updateArrowButtons = (currentPage, totalPages) => {
+const updateArrowButtons = () => {
    const prevButton = document.querySelector('.prevButton ')
    const nextButton = document.querySelector('.nextButton')
-   if (currentPage === 0) {
-      document.querySelector('.pagination').classList.add('is-hidden')
-   } else {
-      document.querySelector('.pagination').classList.remove('is-hidden')
-      prevButton.disabled = currentPage === 1
-      nextButton.disabled = currentPage === totalPages
-   }
+   prevButton.disabled = currentPage === 1
+   nextButton.disabled = currentPage === totalPages
+   document.querySelector('.pagination').classList.toggle('is-hidden', totalPages === 0)
 }
 
 /**
  * Updates the pagination controls and displays the appropriate page of items.
  *
- * @param {Array} [filteredRows=null] - An optional array of filtered rows to use for pagination.
+ * @param {Array} [filteredRows=[]] - An optional array of filtered rows to use for pagination.
  */
-const updatePagination = (filteredRows = null) => {
+const updatePagination = (filteredRows = []) => {
    const rows = filteredRows ? filteredRows.length : document.querySelectorAll('tr[data-row-data]').length
    const remainingRows = filteredRows
       ? filteredRows.length
@@ -497,27 +472,15 @@ const updatePagination = (filteredRows = null) => {
    const currentPageInput = document.querySelector('#currentPageInput')
 
    totalPages = Math.ceil((filteredRows ? remainingRows : rows) / itemsPerPage)
-
-   if (totalPages === 0) {
-      currentPage = 0
-      currentPageInput.value = currentPage
-   } else {
-      currentPageInput.value = currentPage
-   }
-
+   currentPage = Math.min(currentPage, totalPages)
+   currentPageInput.value = currentPage
    currentPageInfo.textContent = ` z ${totalPages}`
 
-   // Check if we are on the last page
-   if (currentPage > totalPages) {
-      currentPage = totalPages === 0 ? 1 : totalPages // Set to the first page if there are no pages, else to the last page
-      currentPageInput.value = currentPage // Update the page number input
-      displayPage(currentPage, itemsPerPage, filteredRows, !!filteredRows)
-      // Check if we are on a page other than the last one
-   } else if (currentPage <= totalPages && remainingRows === 0) {
+   if (currentPage <= totalPages && remainingRows === 0) {
       currentPageInput.value = currentPage
       displayPage(currentPage, itemsPerPage, filteredRows, !!filteredRows)
    }
-   updateArrowButtons(currentPage, totalPages)
+   updateArrowButtons()
 }
 
 /**
@@ -531,11 +494,13 @@ const createLogoSW = () => {
    main.appendChild(logoContainer)
 }
 
-// Removing the Star Wars logo from the DOM tree
+/**
+ * Removing the Star Wars logo from the DOM tree
+ */
 const removeLogo = () => document.querySelector('.logo-container')?.remove()
 
 /**
- * Removes the Star Wars logo container from the DOM tree
+ * Creates a footer to the document
  */
 const createFooter = () => {
    const footer = document.createElement('footer')
