@@ -143,7 +143,7 @@ const handleButtonClick = e => {
    const table = createTable(movieData, category)
 
    // Remove previous table, pagination elements and filters (if they exist)
-   document.querySelector('table')?.remove()
+   document.querySelector('.table-container')?.remove()
    document.querySelector('.pagination')?.remove()
    document.querySelector('.search-input-container')?.remove()
    // Remove "is-active" class from all buttons and add it to the clicked button
@@ -188,6 +188,7 @@ const displayPage = (currentPage, itemsPerPage, filteredRows = [], useFilter = f
  * @param {string} category - The category to determine the search input placeholder text.
  */
 const createSearchInput = category => {
+   const tableContainer = document.querySelector('.table-container')
    const searchInputContainer = createContainer('search-input-container')
    const visibleRows = document.querySelectorAll('tbody tr[data-row-data]')
    const searchInputId = createInput('number', 'searchInputId', 'search-input-id', 'index', '1', '1000')
@@ -223,8 +224,7 @@ const createSearchInput = category => {
       searchInputNameOrTitle,
       totalRecordsFound,
    )
-   const table = document.querySelector('table')
-   table.parentNode.insertBefore(searchInputContainer, table)
+   tableContainer.parentNode.insertBefore(searchInputContainer, tableContainer)
 
    searchInputId.addEventListener('input', e => {
       handleSearchInput(e, 'tbody td:nth-child(2n+1)', false)
@@ -292,6 +292,7 @@ const handleSearchInput = (e, cellIndex, useIncludes) => {
  * @returns {HTMLTableElement} - The created table element.
  */
 const createTable = (movieData, category) => {
+   const divTable = createContainer('table-container')
    const table = document.createElement('table')
    const thead = document.createElement('thead')
    // Get headers based on category
@@ -310,7 +311,8 @@ const createTable = (movieData, category) => {
    thead.appendChild(headerRow)
    const tbody = generateBodyTable(movieData, category)
    table.append(thead, tbody)
-   return table
+   divTable.appendChild(table)
+   return divTable
 }
 
 /**
@@ -381,7 +383,7 @@ const generateBodyTable = (movieData, category) => {
  */
 const createPageNavigation = () => {
    const myTable = document.querySelectorAll('tr[data-row-data]')
-   const main = document.querySelector('main')
+   const tableContainer = document.querySelector('.table-container')
    const navBottomContainer = createContainer('pagination')
    const selectOptions = [10, 20] // Define options for items per page
    const selectElement = createSelect(selectOptions)
@@ -404,7 +406,7 @@ const createPageNavigation = () => {
    // Add event listener to handle next button click
    nextButton.addEventListener('click', () => handlePageChange(++currentPage))
    navBottomContainer.append(prevButton, currentPageInput, currentPageInfo, nextButton, selectElement)
-   main.appendChild(navBottomContainer)
+   tableContainer.parentNode.insertBefore(navBottomContainer, tableContainer.nextSibling)
 }
 
 /**
