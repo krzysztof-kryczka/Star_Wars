@@ -463,9 +463,9 @@ const updateArrowButtons = () => {
 /**
  * Updates the pagination controls and displays the appropriate page of items.
  *
- * @param {Array} [filteredRows=[]] - An optional array of filtered rows to use for pagination.
+ * @param {Array} [filteredRows=null] - An optional array of filtered rows to use for pagination.
  */
-const updatePagination = (filteredRows = []) => {
+const updatePagination = (filteredRows = null) => {
    const rows = filteredRows ? filteredRows.length : document.querySelectorAll('tr[data-row-data]').length
    const remainingRows = filteredRows
       ? filteredRows.length
