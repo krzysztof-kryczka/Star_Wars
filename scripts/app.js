@@ -823,24 +823,24 @@ const formatDate = dateString => {
  * @param {Object} data - The data to display in the modal.
  */
 const showModal = data => {
-   const modal = document.createElement('div')
-   modal.classList.add('modal')
+   const modal = createContainer('modal')
+   const table = document.createElement('table')
+   const closeButton = createButton('<i class="fa-solid fa-circle-xmark"></i>', 'modal-close-btn')
    modal.id = 'modal'
    modal.innerHTML = ''
-   const table = document.createElement('table')
-   for (const key in data) {
+   Object.entries(data).forEach(([key, value]) => {
+      const urlArray = value
+         .toString()
+         .replace(/[\\r\\n]/g, '')
+         .split(',')
+         .join(',\n')
       const row = document.createElement('tr')
-      const keyCell = document.createElement('td')
-      const valueCell = document.createElement('td')
-      keyCell.textContent = key
-      const text = data[key]
-      const urlArray = text.toString().split(',').join(',\n')
-      valueCell.textContent = urlArray
+      const keyCell = createCell(key.split('_').join(' '))
+      const valueCell = createCell(urlArray)
       row.append(keyCell, valueCell)
       table.appendChild(row)
-   }
+   })
    modal.appendChild(table)
-   const closeButton = createButton('<i class="fa-solid fa-circle-xmark"></i>', 'modal-close-btn')
    closeButton.setAttribute('data-target', 'data-modal-close')
    closeButton.addEventListener('click', () => {
       closeModal(modal)
